@@ -45,9 +45,10 @@
             font-size: 1.5rem;
             font-weight: 700;
             letter-spacing: -0.5px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             color: var(--sakura-dark);
             text-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            text-align: center;
         }
 
         .quiz-card {
@@ -55,13 +56,41 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             width: 100%;
-            padding: 40px 24px 32px 24px;
+            padding: 35px 24px 32px 24px;
             border-radius: 24px;
             box-shadow: var(--card-shadow);
             border: 1px solid rgba(255, 255, 255, 0.6);
             margin-bottom: 20px;
-            text-align: center;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .audio-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 183, 197, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0;
+            box-shadow: none;
+        }
+
+        .audio-btn:active {
+            transform: scale(0.9);
+            background: rgba(255, 183, 197, 0.4);
+        }
+
+        .audio-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--sakura-dark);
         }
 
         .kanji-word {
@@ -71,15 +100,17 @@
             margin-bottom: 12px;
             letter-spacing: 1px;
             line-height: 1.2;
+            text-align: center; /* Giữ cột A ở giữa trung tâm nổi bật */
         }
 
         .meaning-hint {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             color: #8b6d73;
-            margin-bottom: 35px;
+            margin-bottom: 30px;
             font-weight: 400;
             white-space: pre-line;
-            line-height: 1.5;
+            line-height: 1.6;
+            text-align: justify; /* Căn đều nội dung chữ hai bên */
         }
 
         .input-group {
@@ -96,7 +127,7 @@
             border: 2px solid rgba(255, 183, 197, 0.4);
             border-radius: 16px;
             outline: none;
-            text-align: center;
+            text-align: center; /* Căn giữa ô nhập */
             background: rgba(255, 255, 255, 0.9);
             color: #2c1a1d;
             transition: all 0.3s ease;
@@ -114,7 +145,7 @@
             font-size: 1rem;
         }
 
-        button {
+        button.action-btn {
             width: 100%;
             padding: 16px;
             font-size: 1.1rem;
@@ -125,6 +156,7 @@
             letter-spacing: 0.5px;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
         }
 
         .btn-check {
@@ -147,57 +179,79 @@
             background: #5a202d;
         }
 
-        .btn-shuffle {
+        .nav-actions {
+            display: flex;
+            width: 100%;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 5px;
+        }
+
+        .btn-sub {
             background: transparent;
             color: var(--sakura-dark);
             border: 1.5px solid var(--sakura-primary);
-            padding: 12px 24px;
-            font-size: 0.95rem;
+            padding: 12px 20px;
+            font-size: 0.9rem;
             font-weight: 600;
             border-radius: 14px;
-            width: auto;
-            box-shadow: none;
+            flex: 1;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
         }
 
-        .btn-shuffle:active {
-            background: rgba(255, 183, 197, 0.1);
+        .btn-sub:active {
+            background: rgba(255, 183, 197, 0.15);
         }
 
-        /* Kết quả */
+        .btn-sub:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
         .result-message {
             font-size: 1.2rem;
             font-weight: 700;
             margin-top: 16px;
             min-height: 28px;
             letter-spacing: 0.5px;
+            text-align: center;
         }
 
         .success { color: var(--success-color); }
         .error { color: var(--error-color); }
 
+        .correct-answer-container {
+            text-align: center;
+            margin-top: 8px;
+        }
+
         .correct-answer {
             font-size: 1rem;
             font-weight: 600;
             color: #5a4b4d;
-            margin-top: 8px;
             background: var(--sakura-light);
             padding: 10px 14px;
             border-radius: 10px;
             display: inline-block;
+            text-align: center;
         }
 
         .progress {
             color: #a38d91;
             font-size: 0.9rem;
             font-weight: 600;
-            margin-top: 24px;
+            margin-top: 20px;
             letter-spacing: 1px;
+            text-align: center;
         }
 
         .loading { 
             font-size: 1.2rem; 
             color: var(--sakura-dark); 
             font-weight: 600;
+            text-align: center;
             animation: pulse 1.5s infinite ease-in-out;
         }
 
@@ -213,31 +267,42 @@
     <div class="container">
         <h2>Furigana Quiz 🌸</h2>
 
-        <div id="loading-view" class="loading">Đang tải dữ liệu hoa anh đào...</div>
+        <div id="loading-view" class="loading">Đang kết nối thư viện từ vựng...</div>
 
         <div id="app-view" style="display: none; width: 100%;">
             <div class="quiz-card">
+                <button class="audio-btn" onclick="playAudio()" title="Nghe phát âm">
+                    <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                </button>
+
                 <div class="kanji-word" id="lbl-kanji">-</div>
                 <div class="meaning-hint" id="lbl-meaning">-</div>
 
                 <div class="input-group">
                     <input type="text" id="txt-answer" placeholder="Nhập cách đọc Hiragana..." autocomplete="off" inputmode="search">
-                    <button class="btn-check" id="btn-action" onclick="handleAction()">Kiểm tra</button>
+                    <button class="action-btn btn-check" id="btn-action" onclick="handleAction()">Kiểm tra</button>
                 </div>
 
                 <div class="result-message" id="lbl-result"></div>
-                <div class="correct-answer" id="lbl-correct-answer" style="display: none;"></div>
+                <div class="correct-answer-container">
+                    <div class="correct-answer" id="lbl-correct-answer" style="display: none;"></div>
+                </div>
             </div>
 
-            <button class="btn-shuffle" onclick="shuffleCards()">Trộn ngẫu nhiên</button>
-            <div class="progress" id="lbl-progress">0 / 0</div>
+            <div class="nav-actions">
+                <button class="btn-sub" id="btn-back" onclick="previousQuestion()">← Quay lại</button>
+                <button class="btn-sub" onclick="shuffleCards()">Lượt mới (Trộn)</button>
+            </div>
+            <div class="progress" id="lbl-progress">CÂU: 0 / 0</div>
         </div>
     </div>
 
     <script>
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTy_T9h5patWpbcmmksSOZPsk5dYTUKCAPan9SSME4ReezwI5WJZcsZ_QIQc23D_zcIosPDLc2kkjp6/pub?gid=188188789&single=true&output=csv'; 
 
-        let vocabularyData = [];
+        let globalRawData = [];     // Toàn bộ từ vựng lấy từ Sheets về
+        let activeSessionData = []; // Bộ 20 từ được chọn của phiên hiện tại
+        let userAnswersHistory = [];// Lưu trữ lịch sử câu trả lời của user để xem lại khi bấm "Quay lại"
         let currentIndex = 0;
         let isAnswered = false; 
 
@@ -245,12 +310,12 @@
             try {
                 const response = await fetch(SHEET_CSV_URL);
                 const csvText = await response.text();
-                vocabularyData = parseCSV(csvText);
+                globalRawData = parseCSV(csvText);
                 
-                if(vocabularyData.length > 0) {
+                if(globalRawData.length > 0) {
                     document.getElementById('loading-view').style.display = 'none';
                     document.getElementById('app-view').style.display = 'block';
-                    loadQuestion();
+                    startNewSession();
                 } else {
                     document.getElementById('loading-view').innerText = 'Không lấy được dữ liệu. Kiểm tra lại file Sheets!';
                 }
@@ -294,38 +359,104 @@
             }).filter(item => item.colA && item.colB);
         }
 
-        // Hàm lọc chuẩn: Chỉ giữ lại các ký tự Hiragana và Katakana, loại bỏ tất cả chữ Latinh (THANH XUÂN) hay dấu ngoặc [...]
+        // Tạo một phiên học mới gồm tối đa 20 chữ ngẫu nhiên
+        function startNewSession() {
+            // Trộn ngẫu nhiên toàn bộ kho dữ liệu gốc
+            let shuffled = [...globalRawData].sort(() => Math.random() - 0.5);
+            // Lấy chính xác 20 từ đầu tiên
+            activeSessionData = shuffled.slice(0, 20);
+            userAnswersHistory = new Array(activeSessionData.length).fill(null);
+            currentIndex = 0;
+            loadQuestion();
+        }
+
         function cleanHiragana(text) {
-            // Regex giữ lại các ký tự trong phân vùng Unicode của Hiragana (\u3040-\u309F) và Katakana (\u30A0-\u30FF)
             const matches = text.match(/[\u3040-\u309F\u30A0-\u30FF]+/g);
             return matches ? matches.join('').trim() : '';
         }
 
+        function getTargetReading(text) {
+            return text.includes('[') && text.includes(']') 
+                ? text.substring(text.indexOf('[') + 1, text.indexOf(']'))
+                : text;
+        }
+
         function loadQuestion() {
             isAnswered = false;
-            const item = vocabularyData[currentIndex];
+            const item = activeSessionData[currentIndex];
             
             document.getElementById('lbl-kanji').innerText = item.colA;
-            document.getElementById('lbl-meaning').innerText = item.colD ? item.colD : '(Trống dữ liệu cột D)';
             
+            // Khôi phục trạng thái cũ nếu câu này đã được làm trước đó (khi nhấn Quay lại)
             const inputField = document.getElementById('txt-answer');
-            inputField.value = '';
-            inputField.disabled = false;
-            
-            // Chỉ auto-focus trên thiết bị không phải mobile để tránh bàn phím ảo đẩy màn hình khi vừa chuyển câu
-            if (!('ontouchstart' in window)) {
-                inputField.focus();
-            }
-            
-            document.getElementById('lbl-result').innerText = '';
-            document.getElementById('lbl-correct-answer').innerText = '';
-            document.getElementById('lbl-correct-answer').style.display = 'none';
-            
+            const resultLbl = document.getElementById('lbl-result');
+            const correctLbl = document.getElementById('lbl-correct-answer');
             const btn = document.getElementById('btn-action');
-            btn.innerText = 'Kiểm tra';
-            btn.className = 'btn-check';
+            
+            // Cập nhật trạng thái nút "Quay lại"
+            document.getElementById('btn-back').disabled = (currentIndex === 0);
 
-            document.getElementById('lbl-progress').innerText = `CÂU: ${currentIndex + 1} / ${vocabularyData.length}`;
+            if (userAnswersHistory[currentIndex] !== null) {
+                // Câu hỏi đã từng được trả lời trước đó
+                isAnswered = true;
+                const savedAnswer = userAnswersHistory[currentIndex];
+                inputField.value = savedAnswer;
+                inputField.disabled = true;
+
+                document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
+                
+                const cleanUser = cleanHiragana(savedAnswer);
+                const cleanCorrect = cleanHiragana(item.colB);
+
+                if (cleanUser === cleanCorrect && cleanCorrect !== '') {
+                    resultLbl.innerText = '🎉 CHÍNH XÁC!';
+                    resultLbl.className = 'result-message success';
+                    correctLbl.style.display = 'none';
+                } else {
+                    resultLbl.innerText = '❌ SAI MẤT RỒI!';
+                    resultLbl.className = 'result-message error';
+                    correctLbl.innerText = `Đáp án: ${getTargetReading(item.colB)}`;
+                    correctLbl.style.display = 'inline-block';
+                }
+
+                btn.innerText = 'Tiếp theo';
+                btn.className = 'action-btn btn-next';
+            } else {
+                // Câu hỏi hoàn toàn mới
+                document.getElementById('lbl-meaning').innerText = item.colD ? item.colD : '(Trống dữ liệu cột D)';
+                inputField.value = '';
+                inputField.disabled = false;
+                
+                resultLbl.innerText = '';
+                correctLbl.innerText = '';
+                correctLbl.style.display = 'none';
+                
+                btn.innerText = 'Kiểm tra';
+                btn.className = 'action-btn btn-check';
+                
+                // Tự động phát âm thanh ngay khi lật câu mới
+                playAudio();
+            }
+
+            // Giữ tiêu điểm nhập liệu cho ô text để sẵn sàng gõ tiếp luôn
+            setTimeout(() => { inputField.focus(); }, 50);
+
+            document.getElementById('lbl-progress').innerText = `CÂU: ${currentIndex + 1} / ${activeSessionData.length}`;
+        }
+
+        // Thực hiện việc đọc âm thanh giọng Nhật bằng Text-To-Speech
+        function playAudio() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Ngắt âm thanh đang chạy trước đó tránh đè dữ liệu
+                const item = activeSessionData[currentIndex];
+                const rawReading = getTargetReading(item.colB);
+                
+                // Tạo đối tượng giọng đọc, ưu tiên cấu hình ngôn ngữ jp
+                const utterance = new SpeechSynthesisUtterance(rawReading);
+                utterance.lang = 'ja-JP';
+                utterance.rate = 0.85; // Điều chỉnh tốc độ nói vừa phải để dễ nghe học tập
+                window.speechSynthesis.speak(utterance);
+            }
         }
 
         function handleAction() {
@@ -337,23 +468,25 @@
         }
 
         function checkAnswer() {
-            const item = vocabularyData[currentIndex];
+            const item = activeSessionData[currentIndex];
             const inputField = document.getElementById('txt-answer');
-            
             const rawUserAnswer = inputField.value;
-            const cleanUser = cleanHiragana(rawUserAnswer);
-            const cleanCorrect = cleanHiragana(item.colB);
             
             if(!rawUserAnswer.trim()) {
                 alert('Vui lòng nhập cách đọc trước nhé!');
                 return;
             }
 
+            // Ghi nhận đáp án vào bộ nhớ lịch sử
+            userAnswersHistory[currentIndex] = rawUserAnswer;
             isAnswered = true;
             inputField.disabled = true;
 
+            // Chuyển nội dung sang thông tin bổ sung mặt sau (Cột E)
             document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
 
+            const cleanUser = cleanHiragana(rawUserAnswer);
+            const cleanCorrect = cleanHiragana(item.colB);
             const resultLbl = document.getElementById('lbl-result');
             
             if (cleanUser === cleanCorrect && cleanCorrect !== '') {
@@ -363,40 +496,44 @@
                 resultLbl.innerText = '❌ SAI MẤT RỒI!';
                 resultLbl.className = 'result-message error';
                 
-                // Hiển thị phần text gốc trong ngoặc rõ ràng
-                const targetDisplay = item.colB.includes('[') && item.colB.includes(']') 
-                    ? item.colB.substring(item.colB.indexOf('[') + 1, item.colB.indexOf(']'))
-                    : item.colB;
-                
                 const correctLbl = document.getElementById('lbl-correct-answer');
-                correctLbl.innerText = `Đáp án: ${targetDisplay}`;
+                correctLbl.innerText = `Đáp án: ${getTargetReading(item.colB)}`;
                 correctLbl.style.display = 'inline-block';
             }
 
             const btn = document.getElementById('btn-action');
             btn.innerText = 'Tiếp theo';
-            btn.className = 'btn-next';
+            btn.className = 'action-btn btn-next';
+            
+            // Giữ lại tiêu điểm để phím Enter tiếp theo hoạt động mượt mà luôn
+            inputField.focus();
         }
 
         function nextQuestion() {
-            if (currentIndex < vocabularyData.length - 1) {
+            if (currentIndex < activeSessionData.length - 1) {
                 currentIndex++;
                 loadQuestion();
             } else {
-                alert('Chúc mừng! Bạn đã hoàn thành xuất sắc bộ từ vựng 🌸');
-                currentIndex = 0;
+                alert('Chúc mừng! Bạn đã hoàn thành xuất sắc lượt 20 từ vựng này 🌸');
+                startNewSession();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
                 loadQuestion();
             }
         }
 
         function shuffleCards() {
-            vocabularyData.sort(() => Math.random() - 0.5);
-            currentIndex = 0;
-            loadQuestion();
+            startNewSession();
         }
 
-        document.getElementById('txt-answer').addEventListener('keypress', function(e) {
+        // Tối ưu hóa phím Enter chuyển đổi trạng thái liên tục không cần chạm chuột
+        document.getElementById('txt-answer').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
+                e.preventDefault(); // Ngăn chặn hành vi mặc định tránh mất focus bàn phím
                 handleAction();
             }
         });
