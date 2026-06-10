@@ -145,6 +145,13 @@
             background: #fff;
         }
 
+        /* Thêm phong cách trực quan khi ô nhập ở chế độ xem lại */
+        input[type="text"]:read-only {
+            background: rgba(240, 240, 240, 0.6);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: #555;
+        }
+
         input[type="text"]::placeholder {
             color: #cbc0c2;
             font-size: 1rem;
@@ -421,7 +428,8 @@
 
         function startNewSession() {
             let shuffled = [...globalRawData].sort(() => Math.random() - 0.5);
-            activeSessionData = shuffled.slice(0, 20);
+            // ĐÃ ĐỔI: Chỉ lấy chính xác 10 từ cho mỗi lượt học
+            activeSessionData = shuffled.slice(0, 10);
             userAnswersHistory = new Array(activeSessionData.length).fill(null);
             currentIndex = 0;
             loadQuestion();
@@ -456,7 +464,9 @@
                 isAnswered = true;
                 const savedAnswer = userAnswersHistory[currentIndex];
                 inputField.value = savedAnswer;
-                inputField.disabled = true;
+                
+                // TỐI ƯU: Dùng readOnly thay vì disabled để giữ tiêu điểm phím Enter
+                inputField.readOnly = true;
 
                 document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
                 
@@ -479,7 +489,7 @@
             } else {
                 document.getElementById('lbl-meaning').innerText = item.colD ? item.colD : '(Trống dữ liệu cột D)';
                 inputField.value = '';
-                inputField.disabled = false;
+                inputField.readOnly = false;
                 
                 resultLbl.innerText = '';
                 correctLbl.innerText = '';
@@ -488,7 +498,6 @@
                 btn.innerText = 'Kiểm tra';
                 btn.className = 'action-btn btn-check';
                 
-                // Phát âm thanh bất đồng bộ, không chặn luồng giao diện
                 setTimeout(playAudio, 0);
             }
 
@@ -529,7 +538,9 @@
 
             userAnswersHistory[currentIndex] = rawUserAnswer;
             isAnswered = true;
-            inputField.disabled = true;
+            
+            // TỐI ƯU: Chuyển sang readOnly để không làm mất tiêu điểm (focus) của input
+            inputField.readOnly = true;
 
             document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
 
@@ -553,8 +564,10 @@
             btn.innerText = 'Tiếp theo';
             btn.className = 'action-btn btn-next';
             
-            // Phát âm phát lại ở mặt sau chạy không đồng bộ nền
+            // Phát âm thanh bất đồng bộ ở mặt sau kết quả
             setTimeout(playAudio, 0);
+            
+            // Khóa tiêu điểm ép trình duyệt giữ lại sự kiện Enter
             inputField.focus();
         }
 
@@ -587,7 +600,6 @@
             const container = document.getElementById('report-list-container');
             container.innerHTML = ''; 
 
-            // Sử dụng DocumentFragment để tối ưu hóa render danh sách báo cáo siêu nhanh
             const fragment = document.createDocumentFragment();
 
             activeSessionData.forEach((item, index) => {
@@ -628,7 +640,7 @@
             startNewSession();
         }
 
-        // Tối ưu hóa triệt để sự kiện Keydown lướt mượt mà không khựng bàn phím
+        // Tối ưu hóa triệt để sự kiện Keydown
         document.getElementById('txt-answer').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault(); 
