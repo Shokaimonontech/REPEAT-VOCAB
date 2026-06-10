@@ -35,7 +35,7 @@
 
         .container {
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -97,20 +97,26 @@
             font-size: 3.2rem;
             font-weight: 800;
             color: #2c1a1d;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             letter-spacing: 1px;
             line-height: 1.2;
-            text-align: center; /* Giữ cột A ở giữa trung tâm nổi bật */
+            text-align: center;
         }
 
+        /* Định dạng lại Cột D, E dễ nhìn và nổi bật hơn */
         .meaning-hint {
-            font-size: 1.05rem;
-            color: #8b6d73;
+            font-size: 1.1rem;
+            color: #4a3336;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 14px 18px;
+            border-radius: 16px;
             margin-bottom: 30px;
-            font-weight: 400;
+            font-weight: 500;
             white-space: pre-line;
             line-height: 1.6;
-            text-align: justify; /* Căn đều nội dung chữ hai bên */
+            text-align: justify;
+            border-left: 4px solid var(--sakura-primary);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
         }
 
         .input-group {
@@ -127,7 +133,7 @@
             border: 2px solid rgba(255, 183, 197, 0.4);
             border-radius: 16px;
             outline: none;
-            text-align: center; /* Căn giữa ô nhập */
+            text-align: center;
             background: rgba(255, 255, 255, 0.9);
             color: #2c1a1d;
             transition: all 0.3s ease;
@@ -247,6 +253,61 @@
             text-align: center;
         }
 
+        /* CSS giao diện Báo cáo kết quả */
+        .report-view {
+            background: rgba(255, 255, 255, 0.9);
+            width: 100%;
+            padding: 30px 20px;
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .report-header {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .report-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            background: var(--sakura-light);
+            padding: 15px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .stat-correct { color: var(--success-color); }
+        .stat-wrong { color: var(--error-color); }
+
+        .report-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 4px;
+        }
+
+        .report-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+
+        .report-item:last-child { border-bottom: none; }
+
+        .item-kanji { font-weight: 700; color: #2c1a1d; }
+        .item-details { text-align: right; font-size: 0.85rem; }
+
+        .txt-success { color: var(--success-color); font-weight: 600; }
+        .txt-danger { color: var(--error-color); font-weight: 600; }
+
         .loading { 
             font-size: 1.2rem; 
             color: var(--sakura-dark); 
@@ -295,14 +356,27 @@
             </div>
             <div class="progress" id="lbl-progress">CÂU: 0 / 0</div>
         </div>
+
+        <div id="report-view" class="report-view" style="display: none;">
+            <div class="report-header">Kết Quả Lượt Học 🎉</div>
+            <div class="report-stats">
+                <div class="stat-correct">Đúng: <span id="stat-correct-count">0</span></div>
+                <div class="stat-wrong">Sai: <span id="stat-wrong-count">0</span></div>
+                <div style="color: #5a4b4d;">Tỷ lệ: <span id="stat-percent">0%</span></div>
+            </div>
+            <div class="report-list" id="report-list-container">
+                </div>
+            <button class="action-btn btn-next" onclick="restartSessionFromReport()">Tiếp tục lượt mới 🌸</button>
+        </div>
+
     </div>
 
     <script>
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTy_T9h5patWpbcmmksSOZPsk5dYTUKCAPan9SSME4ReezwI5WJZcsZ_QIQc23D_zcIosPDLc2kkjp6/pub?gid=188188789&single=true&output=csv'; 
 
-        let globalRawData = [];     // Toàn bộ từ vựng lấy từ Sheets về
-        let activeSessionData = []; // Bộ 20 từ được chọn của phiên hiện tại
-        let userAnswersHistory = [];// Lưu trữ lịch sử câu trả lời của user để xem lại khi bấm "Quay lại"
+        let globalRawData = [];     
+        let activeSessionData = []; 
+        let userAnswersHistory = [];
         let currentIndex = 0;
         let isAnswered = false; 
 
@@ -314,7 +388,7 @@
                 
                 if(globalRawData.length > 0) {
                     document.getElementById('loading-view').style.display = 'none';
-                    document.getElementById('app-view').style.display = 'block';
+                    showQuizScreen();
                     startNewSession();
                 } else {
                     document.getElementById('loading-view').innerText = 'Không lấy được dữ liệu. Kiểm tra lại file Sheets!';
@@ -359,11 +433,8 @@
             }).filter(item => item.colA && item.colB);
         }
 
-        // Tạo một phiên học mới gồm tối đa 20 chữ ngẫu nhiên
         function startNewSession() {
-            // Trộn ngẫu nhiên toàn bộ kho dữ liệu gốc
             let shuffled = [...globalRawData].sort(() => Math.random() - 0.5);
-            // Lấy chính xác 20 từ đầu tiên
             activeSessionData = shuffled.slice(0, 20);
             userAnswersHistory = new Array(activeSessionData.length).fill(null);
             currentIndex = 0;
@@ -371,6 +442,7 @@
         }
 
         function cleanHiragana(text) {
+            if (!text) return '';
             const matches = text.match(/[\u3040-\u309F\u30A0-\u30FF]+/g);
             return matches ? matches.join('').trim() : '';
         }
@@ -387,17 +459,14 @@
             
             document.getElementById('lbl-kanji').innerText = item.colA;
             
-            // Khôi phục trạng thái cũ nếu câu này đã được làm trước đó (khi nhấn Quay lại)
             const inputField = document.getElementById('txt-answer');
             const resultLbl = document.getElementById('lbl-result');
             const correctLbl = document.getElementById('lbl-correct-answer');
             const btn = document.getElementById('btn-action');
             
-            // Cập nhật trạng thái nút "Quay lại"
             document.getElementById('btn-back').disabled = (currentIndex === 0);
 
             if (userAnswersHistory[currentIndex] !== null) {
-                // Câu hỏi đã từng được trả lời trước đó
                 isAnswered = true;
                 const savedAnswer = userAnswersHistory[currentIndex];
                 inputField.value = savedAnswer;
@@ -422,7 +491,6 @@
                 btn.innerText = 'Tiếp theo';
                 btn.className = 'action-btn btn-next';
             } else {
-                // Câu hỏi hoàn toàn mới
                 document.getElementById('lbl-meaning').innerText = item.colD ? item.colD : '(Trống dữ liệu cột D)';
                 inputField.value = '';
                 inputField.disabled = false;
@@ -434,27 +502,23 @@
                 btn.innerText = 'Kiểm tra';
                 btn.className = 'action-btn btn-check';
                 
-                // Tự động phát âm thanh ngay khi lật câu mới
+                // Phát âm thanh tự động ở mặt trước
                 playAudio();
             }
 
-            // Giữ tiêu điểm nhập liệu cho ô text để sẵn sàng gõ tiếp luôn
             setTimeout(() => { inputField.focus(); }, 50);
-
             document.getElementById('lbl-progress').innerText = `CÂU: ${currentIndex + 1} / ${activeSessionData.length}`;
         }
 
-        // Thực hiện việc đọc âm thanh giọng Nhật bằng Text-To-Speech
         function playAudio() {
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // Ngắt âm thanh đang chạy trước đó tránh đè dữ liệu
+                window.speechSynthesis.cancel(); 
                 const item = activeSessionData[currentIndex];
                 const rawReading = getTargetReading(item.colB);
                 
-                // Tạo đối tượng giọng đọc, ưu tiên cấu hình ngôn ngữ jp
                 const utterance = new SpeechSynthesisUtterance(rawReading);
                 utterance.lang = 'ja-JP';
-                utterance.rate = 0.85; // Điều chỉnh tốc độ nói vừa phải để dễ nghe học tập
+                utterance.rate = 0.85; 
                 window.speechSynthesis.speak(utterance);
             }
         }
@@ -477,12 +541,10 @@
                 return;
             }
 
-            // Ghi nhận đáp án vào bộ nhớ lịch sử
             userAnswersHistory[currentIndex] = rawUserAnswer;
             isAnswered = true;
             inputField.disabled = true;
 
-            // Chuyển nội dung sang thông tin bổ sung mặt sau (Cột E)
             document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
 
             const cleanUser = cleanHiragana(rawUserAnswer);
@@ -505,7 +567,9 @@
             btn.innerText = 'Tiếp theo';
             btn.className = 'action-btn btn-next';
             
-            // Giữ lại tiêu điểm để phím Enter tiếp theo hoạt động mượt mà luôn
+            // Tự động phát lại âm thanh khi chuyển sang mặt sau kết quả
+            playAudio();
+
             inputField.focus();
         }
 
@@ -514,8 +578,7 @@
                 currentIndex++;
                 loadQuestion();
             } else {
-                alert('Chúc mừng! Bạn đã hoàn thành xuất sắc lượt 20 từ vựng này 🌸');
-                startNewSession();
+                showReportScreen(); // Hết 20 câu -> Chuyển sang màn hình báo cáo tổng kết
             }
         }
 
@@ -530,10 +593,58 @@
             startNewSession();
         }
 
-        // Tối ưu hóa phím Enter chuyển đổi trạng thái liên tục không cần chạm chuột
+        // Tạo danh sách lịch sử chi tiết cho bảng báo cáo
+        function showReportScreen() {
+            document.getElementById('app-view').style.display = 'none';
+            document.getElementById('report-view').style.display = 'block';
+
+            let correctCount = 0;
+            let wrongCount = 0;
+            const container = document.getElementById('report-list-container');
+            container.innerHTML = ''; // Clear dữ liệu cũ
+
+            activeSessionData.forEach((item, index) => {
+                const userAns = userAnswersHistory[index];
+                const cleanUser = cleanHiragana(userAns);
+                const cleanCorrect = cleanHiragana(item.colB);
+                const targetRead = getTargetReading(item.colB);
+
+                const isCorrect = (cleanUser === cleanCorrect && cleanCorrect !== '');
+                if (isCorrect) correctCount++; else wrongCount++;
+
+                // Tạo element dòng dữ liệu
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'report-item';
+                
+                itemDiv.innerHTML = `
+                    <div class="item-kanji">${index + 1}. ${item.colA}</div>
+                    <div class="item-details">
+                        <div class="${isCorrect ? 'txt-success' : 'txt-danger'}">${isCorrect ? 'Đúng' : 'Sai'}</div>
+                        <div style="color: #777;">Nhập: ${userAns || '(Trống)'} | ĐÚNG: ${targetRead}</div>
+                    </div>
+                `;
+                container.appendChild(itemDiv);
+            });
+
+            // Gán các số liệu thống kê
+            document.getElementById('stat-correct-count').innerText = correctCount;
+            document.getElementById('stat-wrong-count').innerText = wrongCount;
+            document.getElementById('stat-percent').innerText = Math.round((correctCount / activeSessionData.length) * 100) + '%';
+        }
+
+        function showQuizScreen() {
+            document.getElementById('app-view').style.display = 'block';
+            document.getElementById('report-view').style.display = 'none';
+        }
+
+        function restartSessionFromReport() {
+            showQuizScreen();
+            startNewSession();
+        }
+
         document.getElementById('txt-answer').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                e.preventDefault(); // Ngăn chặn hành vi mặc định tránh mất focus bàn phím
+                e.preventDefault(); 
                 handleAction();
             }
         });
