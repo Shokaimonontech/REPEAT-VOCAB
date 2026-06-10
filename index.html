@@ -28,7 +28,6 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
             color: var(--sakura-dark);
         }
@@ -51,45 +50,72 @@
             text-align: center;
         }
 
-        .quiz-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+        /* --- CẤU TRÚC HIỆU ỨNG LẬT 3D --- */
+        .flashcard-wrapper {
+            perspective: 1000px;
             width: 100%;
-            padding: 35px 24px 32px 24px;
-            border-radius: 24px;
-            box-shadow: var(--card-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.6);
             margin-bottom: 20px;
-            position: relative;
         }
 
+        .quiz-card {
+            width: 100%;
+            height: 320px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Class kích hoạt trạng thái lật mặt sau */
+        .quiz-card.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 24px;
+            padding: 30px 24px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-front {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .card-back {
+            background: rgba(255, 245, 247, 0.95);
+            transform: rotateY(180deg);
+            border: 2px solid var(--sakura-primary);
+        }
+
+        /* --- AUDIO BUTTON --- */
         .audio-btn {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 183, 197, 0.2);
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 183, 197, 0.3);
             border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s ease;
-            padding: 0;
-            box-shadow: none;
-        }
-
-        .audio-btn:active {
-            transform: scale(0.9);
-            background: rgba(255, 183, 197, 0.4);
+            z-index: 10;
         }
 
         .audio-btn svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             fill: var(--sakura-dark);
         }
 
@@ -97,32 +123,40 @@
             font-size: 3.2rem;
             font-weight: 800;
             color: #2c1a1d;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             letter-spacing: 1px;
             line-height: 1.2;
             text-align: center;
         }
 
         .meaning-hint {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             color: #4a3336;
-            background: rgba(255, 255, 255, 0.6);
-            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 12px 16px;
             border-radius: 16px;
-            margin-bottom: 30px;
             font-weight: 500;
             white-space: pre-line;
-            line-height: 1.6;
+            line-height: 1.5;
             text-align: justify;
             border-left: 4px solid var(--sakura-primary);
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+            width: 100%;
+            overflow-y: auto;
+        }
+
+        /* --- KHU VỰC ĐIỀN ĐÁP ÁN --- */
+        .input-area-wrapper {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 16px;
+            border-radius: 20px;
+            margin-bottom: 20px;
         }
 
         .input-group {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-bottom: 16px;
         }
 
         input[type="text"] {
@@ -146,14 +180,8 @@
         }
 
         input[type="text"]:read-only {
-            background: rgba(240, 240, 240, 0.6);
-            border-color: rgba(0, 0, 0, 0.1);
+            background: rgba(230, 230, 230, 0.5);
             color: #555;
-        }
-
-        input[type="text"]::placeholder {
-            color: #cbc0c2;
-            font-size: 1rem;
         }
 
         button.action-btn {
@@ -167,216 +195,125 @@
             letter-spacing: 0.5px;
             transition: all 0.2s ease;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            text-align: center;
         }
 
-        .btn-check {
-            background: var(--sakura-primary);
-            color: white;
-        }
-
-        .btn-next {
-            background: var(--sakura-dark);
-            color: white;
-        }
+        .btn-check { background: var(--sakura-primary); color: white; }
+        .btn-next { background: var(--sakura-dark); color: white; }
 
         .nav-actions {
             display: flex;
             width: 100%;
             gap: 12px;
-            justify-content: center;
             margin-top: 5px;
         }
 
         .btn-sub {
-            background: transparent;
+            background: rgba(255, 255, 255, 0.7);
             color: var(--sakura-dark);
             border: 1.5px solid var(--sakura-primary);
-            padding: 12px 20px;
+            padding: 12px 10px;
             font-size: 0.9rem;
             font-weight: 600;
             border-radius: 14px;
             flex: 1;
             cursor: pointer;
-            text-align: center;
             transition: all 0.15s ease;
         }
 
-        .btn-sub:active {
-            background: rgba(255, 183, 197, 0.15);
-        }
+        .btn-sub:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        .btn-sub:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .result-message {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-top: 16px;
-            min-height: 28px;
-            letter-spacing: 0.5px;
-            text-align: center;
-        }
-
+        .result-message { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
         .success { color: var(--success-color); }
         .error { color: var(--error-color); }
 
-        .correct-answer-container {
-            text-align: center;
-            margin-top: 8px;
-        }
-
         .correct-answer {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #5a4b4d;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2c1a1d;
             background: var(--sakura-light);
-            padding: 10px 14px;
+            padding: 8px 14px;
             border-radius: 10px;
-            display: inline-block;
-            text-align: center;
+            border: 1px dashed var(--sakura-primary);
         }
 
-        .progress {
-            color: #a38d91;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-top: 20px;
-            letter-spacing: 1px;
-            text-align: center;
-        }
+        .progress { color: #a38d91; font-size: 0.9rem; font-weight: 600; margin-top: 15px; }
 
+        /* --- REPORT VIEW --- */
         .report-view {
             background: rgba(255, 255, 255, 0.9);
             width: 100%;
-            padding: 30px 20px;
+            padding: 24px 20px;
             border-radius: 24px;
             box-shadow: var(--card-shadow);
             border: 1px solid rgba(255, 255, 255, 0.6);
-        }
-
-        .report-header {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-            text-align: center;
-        }
-
-        .report-time {
-            font-size: 0.85rem;
-            color: #8b6d73;
-            text-align: center;
-            margin-bottom: 15px;
-            font-weight: 500;
+            margin-bottom: 20px;
         }
 
         .report-stats {
             display: flex;
             justify-content: space-around;
-            margin-bottom: 20px;
+            margin: 12px 0;
             background: var(--sakura-light);
-            padding: 15px;
+            padding: 12px;
             border-radius: 16px;
             font-weight: 700;
-            font-size: 1.05rem;
         }
 
-        .stat-correct { color: var(--success-color); }
-        .stat-wrong { color: var(--error-color); }
-
-        .report-list {
-            max-height: 240px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            padding-right: 4px;
-            border-bottom: 1px dashed rgba(0,0,0,0.1);
-        }
-
+        .report-list { max-height: 240px; overflow-y: auto; margin-bottom: 15px; }
         .report-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            font-size: 0.95rem;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: background 0.2s ease;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-size: 0.95rem; cursor: pointer; border-radius: 8px;
         }
+        .report-item:active { background: rgba(255, 183, 197, 0.15); }
 
-        .report-item:hover, .report-item:active {
-            background: rgba(255, 183, 197, 0.15);
-        }
-
-        .report-item:last-child { border-bottom: none; }
-
-        .item-kanji { font-weight: 700; color: #2c1a1d; }
-        .item-details { text-align: right; font-size: 0.85rem; }
-
-        .txt-success { color: var(--success-color); font-weight: 600; }
-        .txt-danger { color: var(--error-color); font-weight: 600; }
-
-        .history-summary {
-            font-size: 0.85rem;
-            color: #8b6d73;
-            margin-bottom: 12px;
-            font-weight: 600;
-            text-align: center;
+        /* --- KHU VỰC LỊCH SỬ CỐ ĐỊNH LUÔN XUẤT HIỆN --- */
+        .permanent-history-wrapper {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 20px;
+            padding: 16px;
+            margin-top: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.02);
+            border: 1px solid rgba(255,255,255,0.5);
         }
 
         .history-section-title {
             font-size: 0.95rem;
             font-weight: 700;
-            margin: 15px 0 8px 0;
+            margin: 0 0 10px 0;
             color: var(--sakura-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .history-log-container {
-            max-height: 140px;
+            max-height: 150px;
             overflow-y: auto;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 12px;
-            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
         .history-log-item {
             display: flex;
             justify-content: space-between;
-            padding: 6px 8px;
+            padding: 8px 12px;
             font-size: 0.8rem;
-            border-bottom: 1px solid rgba(0,0,0,0.03);
+            background: #fff;
+            border-radius: 10px;
             font-weight: 500;
+            border: 1px solid rgba(255, 183, 197, 0.15);
         }
-        .history-log-item:last-child { border-bottom: none; }
 
         .clear-btn {
-            background: none;
-            border: none;
-            color: #a38d91;
-            font-size: 0.75rem;
-            cursor: pointer;
-            text-decoration: underline;
-            padding: 0;
-            float: right;
-            margin-top: 2px;
+            background: none; border: none; color: #a38d91;
+            font-size: 0.75rem; cursor: pointer; text-decoration: underline; padding: 0;
         }
 
-        .loading { 
-            font-size: 1.2rem; 
-            color: var(--sakura-dark); 
-            font-weight: 600;
-            text-align: center;
-            animation: pulse 1.5s infinite ease-in-out;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
-        }
+        .loading { font-size: 1.2rem; color: var(--sakura-dark); font-weight: 600; text-align: center; animation: pulse 1.5s infinite ease-in-out; margin-top: 40px;}
+        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -387,53 +324,65 @@
         <div id="loading-view" class="loading">Đang kết nối thư viện từ vựng...</div>
 
         <div id="app-view" style="display: none; width: 100%;">
-            <div class="quiz-card">
-                <button class="audio-btn" onclick="playAudio()" title="Nghe phát âm">
-                    <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-                </button>
+            <div class="flashcard-wrapper">
+                <div class="quiz-card" id="flashcard" onclick="toggleManualFlip()">
+                    
+                    <div class="card-face card-front">
+                        <button class="audio-btn" onclick="event.stopPropagation(); playAudio();" title="Nghe phát âm">
+                            <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                        </button>
+                        <div class="kanji-word" id="lbl-kanji-front">-</div>
+                        <div class="meaning-hint" id="lbl-meaning-front">-</div>
+                    </div>
 
-                <div class="kanji-word" id="lbl-kanji">-</div>
-                <div class="meaning-hint" id="lbl-meaning">-</div>
+                    <div class="card-face card-back">
+                        <button class="audio-btn" onclick="event.stopPropagation(); playAudio();" title="Nghe phát âm">
+                            <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                        </button>
+                        <div class="result-message" id="lbl-result"></div>
+                        <div class="correct-answer-container" style="margin-bottom: 12px;">
+                            <div class="correct-answer" id="lbl-correct-display">-</div>
+                        </div>
+                        <div class="meaning-hint" id="lbl-meaning-back">-</div>
+                    </div>
 
+                </div>
+            </div>
+
+            <div class="input-area-wrapper">
                 <div class="input-group">
                     <input type="text" id="txt-answer" placeholder="Nhập cách đọc Hiragana..." autocomplete="off" inputmode="search">
                     <button class="action-btn btn-check" id="btn-action" onclick="handleAction()">Kiểm tra</button>
                 </div>
-
-                <div class="result-message" id="lbl-result"></div>
-                <div class="correct-answer-container">
-                    <div class="correct-answer" id="lbl-correct-answer" style="display: none;"></div>
+                <div class="nav-actions">
+                    <button class="btn-sub" id="btn-back" onclick="previousQuestion()">← Quay lại</button>
+                    <button class="btn-sub" id="btn-report-nav" onclick="showReportScreen(true)" style="display: none;">Xem bảng điểm</button>
+                    <button class="btn-sub" onclick="shuffleCards()">Trộn lượt mới</button>
                 </div>
+                <div class="progress" id="lbl-progress">CÂU: 0 / 0</div>
             </div>
-
-            <div class="nav-actions">
-                <button class="btn-sub" id="btn-back" onclick="previousQuestion()">← Quay lại</button>
-                <button class="btn-sub" id="btn-report-nav" onclick="showReportScreen(true)" style="display: none;">Xem bảng điểm</button>
-                <button class="btn-sub" onclick="shuffleCards()">Lượt mới (Trộn)</button>
-            </div>
-            <div class="progress" id="lbl-progress">CÂU: 0 / 0</div>
         </div>
 
         <div id="report-view" class="report-view" style="display: none;">
             <div class="report-header">Kết Quả Lượt Học 🎉</div>
-            <div class="report-time" id="lbl-report-time">Hoàn thành lúc: --:--:--</div>
-            <div class="history-summary" id="lbl-history-summary">Tiến trình: Đã bốc 0 / 0 từ</div>
+            <div class="report-time" id="lbl-report-time">--:--:--</div>
             <div class="report-stats">
                 <div class="stat-correct">Đúng: <span id="stat-correct-count">0</span></div>
                 <div class="stat-wrong">Sai: <span id="stat-wrong-count">0</span></div>
                 <div style="color: #5a4b4d;">Tỷ lệ: <span id="stat-percent">0%</span></div>
             </div>
-            <div style="font-size: 0.8rem; margin-bottom: 8px; font-weight: 600; text-align: center; color: #a38d91;">👉 Bấm vào từng từ để xem lại chi tiết ý nghĩa</div>
-            
+            <div style="font-size: 0.8rem; margin-bottom: 8px; font-weight: 600; text-align: center; color: #a38d91;">👉 Bấm vào từng từ dưới đây để tự lật xem chi tiết ý nghĩa</div>
             <div class="report-list" id="report-list-container"></div>
-            
-            <div class="history-section-title">
-                Nhật ký các lượt làm cũ 📜
-                <button class="clear-btn" onclick="clearHistoryLog()">Xóa lịch sử</button>
-            </div>
-            <div class="history-log-container" id="history-log-container"></div>
-            <br>
             <button class="action-btn btn-next" onclick="restartSessionFromReport()">Tiếp tục lượt mới 🌸</button>
+        </div>
+
+        <div class="permanent-history-wrapper">
+            <div class="history-section-title">
+                <span>Nhật ký học tập tích lũy 📜</span>
+                <button class="clear-btn" onclick="clearHistoryLog()">Xóa sạch</button>
+            </div>
+            <div class="history-summary" id="lbl-history-summary" style="text-align: left; margin-bottom: 8px;">Tiến trình: Đã bốc 0 / 0 từ</div>
+            <div class="history-log-container" id="history-log-container"></div>
         </div>
     </div>
 
@@ -449,11 +398,11 @@
         let isAnswered = false; 
 
         async function fetchSheetsData() {
-            // Tải lại nhật ký làm bài từ bộ nhớ localStorage ngay khi mở ứng dụng
             const savedLog = localStorage.getItem('furigana_quiz_history');
             if (savedLog) {
                 try { cumulativeLog = JSON.parse(savedLog); } catch(e) { cumulativeLog = []; }
             }
+            renderHistoryLog();
 
             try {
                 const response = await fetch(SHEET_CSV_URL);
@@ -473,25 +422,17 @@
         }
 
         function parseCSV(text) {
-            let lines = [];
-            let row = [""];
-            let inQuotes = false;
-
+            let lines = []; let row = [""]; let inQuotes = false;
             for (let i = 0; i < text.length; i++) {
-                let c = text[i];
-                let next = text[i+1];
+                let c = text[i]; let next = text[i+1];
                 if (c === '"') {
                     if (inQuotes && next === '"') { row[row.length - 1] += '"'; i++; }
                     else { inQuotes = !inQuotes; }
-                } else if (c === ',' && !inQuotes) {
-                    row.push('');
-                } else if ((c === '\r' || c === '\n') && !inQuotes) {
+                } else if (c === ',' && !inQuotes) { row.push(''); }
+                else if ((c === '\r' || c === '\n') && !inQuotes) {
                     if (c === '\r' && next === '\n') { i++; }
-                    lines.push(row);
-                    row = [''];
-                } else {
-                    row[row.length - 1] += c;
-                }
+                    lines.push(row); row = [''];
+                } else { row[row.length - 1] += c; }
             }
             if (row.length > 1 || row[0] !== '') lines.push(row);
             if (lines.length < 2) return [];
@@ -510,7 +451,6 @@
 
         function startNewSession() {
             let unlearnedPool = globalRawData.filter(item => !learnedWordIds.has(item.id));
-            
             if (unlearnedPool.length === 0) {
                 learnedWordIds.clear();
                 unlearnedPool = [...globalRawData];
@@ -518,7 +458,6 @@
 
             let shuffled = unlearnedPool.sort(() => Math.random() - 0.5);
             activeSessionData = shuffled.slice(0, 10);
-            
             activeSessionData.forEach(item => learnedWordIds.add(item.id));
 
             userAnswersHistory = new Array(activeSessionData.length).fill(null);
@@ -543,50 +482,53 @@
         function loadQuestion() {
             isAnswered = false;
             const item = activeSessionData[currentIndex];
+            const card = document.getElementById('flashcard');
             
-            document.getElementById('lbl-kanji').innerText = item.colA;
-            
+            // Đưa thẻ về mặt trước ban đầu khi tải câu hỏi
+            card.classList.remove('is-flipped');
+
+            // Cập nhật thông tin đồng bộ cả 2 mặt vật lý Front & Back
+            document.getElementById('lbl-kanji-front').innerText = item.colA;
+            document.getElementById('lbl-meaning-front').innerText = item.colD ? item.colD : '(Trống dữ liệu cột D)';
+            document.getElementById('lbl-meaning-back').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
+
             const inputField = document.getElementById('txt-answer');
             const resultLbl = document.getElementById('lbl-result');
-            const correctLbl = document.getElementById('lbl-correct-answer');
+            const correctDisplay = document.getElementById('lbl-correct-display');
             const btn = document.getElementById('btn-action');
             
             document.getElementById('btn-back').disabled = (currentIndex === 0);
 
-            // CẬP NHẬT: Nếu câu này đã được điền từ trước HOẶC người dùng bấm xem lại từ bảng tổng kết công khai
+            // Nếu câu này đã trả lời (khi bấm quay lại hoặc chuyển từ bảng báo cáo)
             if (userAnswersHistory[currentIndex] !== null) {
                 isAnswered = true;
                 const savedAnswer = userAnswersHistory[currentIndex];
                 inputField.value = savedAnswer;
                 inputField.readOnly = true;
 
-                // LUÔN HIỂN THỊ ĐỦ NGHĨA (Cột E) khi xem lại bất kể đúng sai
-                document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
-                
                 const cleanUser = cleanHiragana(savedAnswer);
                 const cleanCorrect = cleanHiragana(item.colB);
 
                 if (cleanUser === cleanCorrect && cleanCorrect !== '') {
                     resultLbl.innerText = '🎉 CHÍNH XÁC!';
                     resultLbl.className = 'result-message success';
-                    correctLbl.style.display = 'none';
                 } else {
                     resultLbl.innerText = '❌ SAI MẤT RỒI!';
                     resultLbl.className = 'result-message error';
-                    correctLbl.innerText = `Đáp án: ${getTargetReading(item.colB)}`;
-                    correctLbl.style.display = 'inline-block';
                 }
+                correctDisplay.innerText = `${item.colA} = ${getTargetReading(item.colB)}`;
+
+                // Tự động lật mặt sau để xem lại thông tin đầy đủ
+                card.classList.add('is-flipped');
 
                 btn.innerText = 'Tiếp theo';
                 btn.className = 'action-btn btn-next';
             } else {
-                document.getElementById('lbl-meaning').innerText = item.colD ? item.colD : '(Trống dữ liệu cột D)';
+                // Trạng thái câu mới hoàn toàn
                 inputField.value = '';
                 inputField.readOnly = false;
-                
                 resultLbl.innerText = '';
-                correctLbl.innerText = '';
-                correctLbl.style.display = 'none';
+                correctDisplay.innerText = '';
                 
                 btn.innerText = 'Kiểm tra';
                 btn.className = 'action-btn btn-check';
@@ -596,6 +538,14 @@
 
             inputField.focus();
             document.getElementById('lbl-progress').innerText = `CÂU: ${currentIndex + 1} / ${activeSessionData.length}`;
+            document.getElementById('lbl-history-summary').innerText = `Tiến trình: Đã bốc ${learnedWordIds.size} / ${globalRawData.length} từ`;
+        }
+
+        // CHỈ CHO PHÉP LẬT THỦ CÔNG BẰNG CHẠM TAY KHI CÂU ĐÓ ĐÃ ĐƯỢC TRẢ LỜI 
+        function toggleManualFlip() {
+            if (isAnswered) {
+                document.getElementById('flashcard').classList.toggle('is-flipped');
+            }
         }
 
         function playAudio() {
@@ -603,7 +553,6 @@
                 window.speechSynthesis.cancel(); 
                 const item = activeSessionData[currentIndex];
                 const rawReading = getTargetReading(item.colB);
-                
                 const utterance = new SpeechSynthesisUtterance(rawReading);
                 utterance.lang = 'ja-JP';
                 utterance.rate = 0.88; 
@@ -633,11 +582,10 @@
             isAnswered = true;
             inputField.readOnly = true;
 
-            document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
-
             const cleanUser = cleanHiragana(rawUserAnswer);
             const cleanCorrect = cleanHiragana(item.colB);
             const resultLbl = document.getElementById('lbl-result');
+            const correctDisplay = document.getElementById('lbl-correct-display');
             
             if (cleanUser === cleanCorrect && cleanCorrect !== '') {
                 resultLbl.innerText = '🎉 CHÍNH XÁC!';
@@ -645,11 +593,11 @@
             } else {
                 resultLbl.innerText = '❌ SAI MẤT RỒI!';
                 resultLbl.className = 'result-message error';
-                
-                const correctLbl = document.getElementById('lbl-correct-answer');
-                correctLbl.innerText = `Đáp án: ${getTargetReading(item.colB)}`;
-                correctLbl.style.display = 'inline-block';
             }
+            correctDisplay.innerText = `${item.colA} = ${getTargetReading(item.colB)}`;
+
+            // Kích hoạt hiệu ứng lật 3D ra mặt sau hiển thị Cột E
+            document.getElementById('flashcard').classList.add('is-flipped');
 
             const btn = document.getElementById('btn-action');
             btn.innerText = 'Tiếp theo';
@@ -657,6 +605,11 @@
             
             setTimeout(playAudio, 0);
             inputField.focus();
+        }
+
+        function AnnapolisFocus() {
+            // Đảm bảo nút input giữ được tương tác bàn phím ảo di động
+            document.getElementById('txt-answer').focus();
         }
 
         function nextQuestion() {
@@ -690,13 +643,11 @@
             document.getElementById('app-view').style.display = 'none';
             document.getElementById('report-view').style.display = 'block';
 
-            let correctCount = 0;
-            let wrongCount = 0;
+            let correctCount = 0; let wrongCount = 0;
             const container = document.getElementById('report-list-container');
             container.innerHTML = ''; 
 
             const fragment = document.createDocumentFragment();
-
             activeSessionData.forEach((item, index) => {
                 const userAns = userAnswersHistory[index];
                 const cleanUser = cleanHiragana(userAns);
@@ -719,29 +670,21 @@
                 `;
                 fragment.appendChild(itemDiv);
             });
-
             container.appendChild(fragment);
 
             const now = new Date();
             const timeString = now.toTimeString().split(' ')[0];
 
-            // TỐI ƯU: Lưu trữ đồng bộ vào localStorage để không bị mất khi reload/qua lượt mới
             if (!isNavigatingBack) {
-                cumulativeLog.unshift({
-                    time: timeString,
-                    correct: correctCount,
-                    wrong: wrongCount
-                });
+                cumulativeLog.unshift({ time: timeString, correct: correctCount, wrong: wrongCount });
                 localStorage.setItem('furigana_quiz_history', JSON.stringify(cumulativeLog));
             }
-            
             renderHistoryLog();
 
             document.getElementById('lbl-report-time').innerText = `Hoàn thành lúc: ${timeString}`;
             document.getElementById('stat-correct-count').innerText = correctCount;
             document.getElementById('stat-wrong-count').innerText = wrongCount;
             document.getElementById('stat-percent').innerText = Math.round((correctCount / activeSessionData.length) * 100) + '%';
-            document.getElementById('lbl-history-summary').innerText = `Tiến trình: Đã bốc ${learnedWordIds.size} / ${globalRawData.length} từ`;
         }
 
         function renderHistoryLog() {
@@ -767,7 +710,6 @@
             });
         }
 
-        // Thêm tính năng xóa lịch sử lưu trữ tích lũy nếu muốn làm sạch bộ nhớ
         function clearHistoryLog() {
             if (confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử các lượt cũ không?')) {
                 cumulativeLog = [];
