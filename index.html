@@ -145,7 +145,6 @@
             background: #fff;
         }
 
-        /* Thêm phong cách trực quan khi ô nhập ở chế độ xem lại */
         input[type="text"]:read-only {
             background: rgba(240, 240, 240, 0.6);
             border-color: rgba(0, 0, 0, 0.1);
@@ -280,7 +279,7 @@
         .stat-wrong { color: var(--error-color); }
 
         .report-list {
-            max-height: 300px;
+            max-height: 320px;
             overflow-y: auto;
             margin-bottom: 20px;
             padding-right: 4px;
@@ -290,9 +289,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 12px;
-            border-bottom: 1px solid #eee;
+            padding: 12px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
             font-size: 0.95rem;
+            cursor: pointer; /* Biến dòng kết quả thành dạng nút bấm được */
+            border-radius: 10px;
+            transition: background 0.2s ease;
+        }
+
+        .report-item:hover, .report-item:active {
+            background: rgba(255, 183, 197, 0.15);
         }
 
         .report-item:last-child { border-bottom: none; }
@@ -302,6 +308,14 @@
 
         .txt-success { color: var(--success-color); font-weight: 600; }
         .txt-danger { color: var(--error-color); font-weight: 600; }
+
+        .history-summary {
+            font-size: 0.85rem;
+            color: #8b6d73;
+            margin-bottom: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
 
         .loading { 
             font-size: 1.2rem; 
@@ -347,6 +361,7 @@
 
             <div class="nav-actions">
                 <button class="btn-sub" id="btn-back" onclick="previousQuestion()">← Quay lại</button>
+                <button class="btn-sub" id="btn-report-nav" onclick="showReportScreen(true)" style="display: none;">Xem bảng điểm</button>
                 <button class="btn-sub" onclick="shuffleCards()">Lượt mới (Trộn)</button>
             </div>
             <div class="progress" id="lbl-progress">CÂU: 0 / 0</div>
@@ -354,11 +369,13 @@
 
         <div id="report-view" class="report-view" style="display: none;">
             <div class="report-header">Kết Quả Lượt Học 🎉</div>
+            <div class="history-summary" id="lbl-history-summary">Đã học: 0 / 0 từ</div>
             <div class="report-stats">
                 <div class="stat-correct">Đúng: <span id="stat-correct-count">0</span></div>
                 <div class="stat-wrong">Sai: <span id="stat-wrong-count">0</span></div>
                 <div style="color: #5a4b4d;">Tỷ lệ: <span id="stat-percent">0%</span></div>
             </div>
+            <div style="font-size: 0.8rem; margin-bottom: 8px; font-weight: 500; text-align: center; color: #a38d91;">👉 Bấm vào từng từ để xem lại chi tiết ý nghĩa</div>
             <div class="report-list" id="report-list-container"></div>
             <button class="action-btn btn-next" onclick="restartSessionFromReport()">Tiếp tục lượt mới 🌸</button>
         </div>
@@ -370,6 +387,7 @@
         let globalRawData = [];     
         let activeSessionData = []; 
         let userAnswersHistory = [];
+        let learnedWordIds = new Set(); // Bộ nhớ lưu trữ danh sách ID/Kanji các từ đã học để tránh trùng lặp
         let currentIndex = 0;
         let isAnswered = false; 
 
@@ -415,9 +433,10 @@
             if (row.length > 1 || row[0] !== '') lines.push(row);
             if (lines.length < 2) return [];
 
-            return lines.slice(1).map(cells => {
+            return lines.slice(1).map((cells, index) => {
                 const cleanCells = cells.map(cell => cell.trim());
                 return {
+                    id: cleanCells[0] + '_' + index, // Tạo ID duy nhất cho từ vựng
                     colA: cleanCells[0] || '',  
                     colB: cleanCells[1] || '',  
                     colD: cleanCells[3] || '',  
@@ -427,11 +446,27 @@
         }
 
         function startNewSession() {
-            let shuffled = [...globalRawData].sort(() => Math.random() - 0.5);
-            // ĐÃ ĐỔI: Chỉ lấy chính xác 10 từ cho mỗi lượt học
+            // Lọc ra danh sách những từ chưa học
+            let unlearnedPool = globalRawData.filter(item => !learnedWordIds.has(item.id));
+            
+            // Nếu đã học hết toàn bộ kho từ vựng thì reset lại bộ nhớ để học vòng mới
+            if (unlearnedPool.length === 0) {
+                learnedWordIds.clear();
+                unlearnedPool = [...globalRawData];
+            }
+
+            // Trộn ngẫu nhiên nhóm từ chưa học
+            let shuffled = unlearnedPool.sort(() => Math.random() - 0.5);
             activeSessionData = shuffled.slice(0, 10);
+            
+            // Đánh dấu nhóm từ này vào danh sách "Đã học"
+            activeSessionData.forEach(item => learnedWordIds.add(item.id));
+
             userAnswersHistory = new Array(activeSessionData.length).fill(null);
             currentIndex = 0;
+            
+            // Ẩn nút xem lại bảng điểm khi sang lượt hoàn toàn mới
+            document.getElementById('btn-report-nav').style.display = 'none';
             loadQuestion();
         }
 
@@ -464,8 +499,6 @@
                 isAnswered = true;
                 const savedAnswer = userAnswersHistory[currentIndex];
                 inputField.value = savedAnswer;
-                
-                // TỐI ƯU: Dùng readOnly thay vì disabled để giữ tiêu điểm phím Enter
                 inputField.readOnly = true;
 
                 document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
@@ -501,6 +534,7 @@
                 setTimeout(playAudio, 0);
             }
 
+            // ÉP BUỘC TRÌNH DUYỆT GIỮ FOCUS CHO Ô NHẬP ĐỂ PHÍM ENTER HOẠT ĐỘNG LIÊN TỤC
             inputField.focus();
             document.getElementById('lbl-progress').innerText = `CÂU: ${currentIndex + 1} / ${activeSessionData.length}`;
         }
@@ -538,8 +572,6 @@
 
             userAnswersHistory[currentIndex] = rawUserAnswer;
             isAnswered = true;
-            
-            // TỐI ƯU: Chuyển sang readOnly để không làm mất tiêu điểm (focus) của input
             inputField.readOnly = true;
 
             document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
@@ -564,10 +596,9 @@
             btn.innerText = 'Tiếp theo';
             btn.className = 'action-btn btn-next';
             
-            // Phát âm thanh bất đồng bộ ở mặt sau kết quả
             setTimeout(playAudio, 0);
             
-            // Khóa tiêu điểm ép trình duyệt giữ lại sự kiện Enter
+            // GIỮ CHẶT FOCUS ĐỂ LẦN BẤM ENTER TIẾP THEO KÍCH HOẠT NEXTQUESTION() NGAY LẬP TỨC
             inputField.focus();
         }
 
@@ -576,7 +607,7 @@
                 currentIndex++;
                 loadQuestion();
             } else {
-                showReportScreen(); 
+                showReportScreen(false); 
             }
         }
 
@@ -591,7 +622,16 @@
             startNewSession();
         }
 
-        function showReportScreen() {
+        // Hàm điều hướng nhảy trực tiếp đến từ vựng được nhấp chọn ở bảng kết quả
+        function inspectWordFromReport(targetIndex) {
+            currentIndex = targetIndex;
+            showQuizScreen();
+            loadQuestion();
+            // Hiện nút điều hướng nhanh về lại bảng điểm ở thanh công cụ dưới
+            document.getElementById('btn-report-nav').style.display = 'inline-block';
+        }
+
+        function showReportScreen(isNavigatingBack = false) {
             document.getElementById('app-view').style.display = 'none';
             document.getElementById('report-view').style.display = 'block';
 
@@ -613,6 +653,9 @@
 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'report-item';
+                // Thêm sự kiện onclick chuyển tiếp dữ liệu xem chi tiết từ vựng
+                itemDiv.onclick = () => inspectWordFromReport(index);
+                
                 itemDiv.innerHTML = `
                     <div class="item-kanji">${index + 1}. ${item.colA}</div>
                     <div class="item-details">
@@ -628,6 +671,7 @@
             document.getElementById('stat-correct-count').innerText = correctCount;
             document.getElementById('stat-wrong-count').innerText = wrongCount;
             document.getElementById('stat-percent').innerText = Math.round((correctCount / activeSessionData.length) * 100) + '%';
+            document.getElementById('lbl-history-summary').innerText = `Tiến trình: Đã bốc ${learnedWordIds.size} / ${globalRawData.length} từ`;
         }
 
         function showQuizScreen() {
@@ -640,7 +684,7 @@
             startNewSession();
         }
 
-        // Tối ưu hóa triệt để sự kiện Keydown
+        // Tối ưu hóa triệt để và khóa chặt luồng nhận diện phím Enter tránh trượt focus bàn phím ảo
         document.getElementById('txt-answer').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault(); 
