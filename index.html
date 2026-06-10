@@ -260,8 +260,16 @@
         .report-header {
             font-size: 1.3rem;
             font-weight: 700;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
             text-align: center;
+        }
+
+        .report-time {
+            font-size: 0.85rem;
+            color: #8b6d73;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 500;
         }
 
         .report-stats {
@@ -279,10 +287,11 @@
         .stat-wrong { color: var(--error-color); }
 
         .report-list {
-            max-height: 320px;
+            max-height: 240px;
             overflow-y: auto;
             margin-bottom: 20px;
             padding-right: 4px;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
         }
 
         .report-item {
@@ -292,7 +301,7 @@
             padding: 12px;
             border-bottom: 1px solid rgba(0,0,0,0.05);
             font-size: 0.95rem;
-            cursor: pointer; /* Biến dòng kết quả thành dạng nút bấm được */
+            cursor: pointer;
             border-radius: 10px;
             transition: background 0.2s ease;
         }
@@ -316,6 +325,33 @@
             font-weight: 600;
             text-align: center;
         }
+
+        /* Lịch sử lưu trữ tích lũy */
+        .history-section-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin: 15px 0 8px 0;
+            color: var(--sakura-dark);
+        }
+
+        .history-log-container {
+            max-height: 140px;
+            overflow-y: auto;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 8px;
+        }
+
+        .history-log-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 8px;
+            font-size: 0.8rem;
+            border-bottom: 1px solid rgba(0,0,0,0.03);
+            font-weight: 500;
+        }
+        .history-log-item:last-child { border-bottom: none; }
 
         .loading { 
             font-size: 1.2rem; 
@@ -369,14 +405,21 @@
 
         <div id="report-view" class="report-view" style="display: none;">
             <div class="report-header">Kết Quả Lượt Học 🎉</div>
-            <div class="history-summary" id="lbl-history-summary">Đã học: 0 / 0 từ</div>
+            <div class="report-time" id="lbl-report-time">Hoàn thành lúc: --:--:--</div>
+            <div class="history-summary" id="lbl-history-summary">Tiến trình: Đã bốc 0 / 0 từ</div>
             <div class="report-stats">
                 <div class="stat-correct">Đúng: <span id="stat-correct-count">0</span></div>
                 <div class="stat-wrong">Sai: <span id="stat-wrong-count">0</span></div>
                 <div style="color: #5a4b4d;">Tỷ lệ: <span id="stat-percent">0%</span></div>
             </div>
-            <div style="font-size: 0.8rem; margin-bottom: 8px; font-weight: 500; text-align: center; color: #a38d91;">👉 Bấm vào từng từ để xem lại chi tiết ý nghĩa</div>
+            <div style="font-size: 0.8rem; margin-bottom: 8px; font-weight: 600; text-align: center; color: #a38d91;">👉 Bấm vào từng từ để xem chi tiết ý nghĩa</div>
+            
             <div class="report-list" id="report-list-container"></div>
+            
+            <div class="history-section-title">Nhật ký các lượt làm cũ 📜</div>
+            <div class="history-log-container" id="history-log-container">
+                </div>
+            <br>
             <button class="action-btn btn-next" onclick="restartSessionFromReport()">Tiếp tục lượt mới 🌸</button>
         </div>
     </div>
@@ -387,7 +430,8 @@
         let globalRawData = [];     
         let activeSessionData = []; 
         let userAnswersHistory = [];
-        let learnedWordIds = new Set(); // Bộ nhớ lưu trữ danh sách ID/Kanji các từ đã học để tránh trùng lặp
+        let learnedWordIds = new Set(); 
+        let cumulativeLog = []; // Lưu trữ lịch sử tất cả các lượt làm bài
         let currentIndex = 0;
         let isAnswered = false; 
 
@@ -436,7 +480,7 @@
             return lines.slice(1).map((cells, index) => {
                 const cleanCells = cells.map(cell => cell.trim());
                 return {
-                    id: cleanCells[0] + '_' + index, // Tạo ID duy nhất cho từ vựng
+                    id: cleanCells[0] + '_' + index, 
                     colA: cleanCells[0] || '',  
                     colB: cleanCells[1] || '',  
                     colD: cleanCells[3] || '',  
@@ -446,26 +490,21 @@
         }
 
         function startNewSession() {
-            // Lọc ra danh sách những từ chưa học
             let unlearnedPool = globalRawData.filter(item => !learnedWordIds.has(item.id));
             
-            // Nếu đã học hết toàn bộ kho từ vựng thì reset lại bộ nhớ để học vòng mới
             if (unlearnedPool.length === 0) {
                 learnedWordIds.clear();
                 unlearnedPool = [...globalRawData];
             }
 
-            // Trộn ngẫu nhiên nhóm từ chưa học
             let shuffled = unlearnedPool.sort(() => Math.random() - 0.5);
             activeSessionData = shuffled.slice(0, 10);
             
-            // Đánh dấu nhóm từ này vào danh sách "Đã học"
             activeSessionData.forEach(item => learnedWordIds.add(item.id));
 
             userAnswersHistory = new Array(activeSessionData.length).fill(null);
             currentIndex = 0;
             
-            // Ẩn nút xem lại bảng điểm khi sang lượt hoàn toàn mới
             document.getElementById('btn-report-nav').style.display = 'none';
             loadQuestion();
         }
@@ -501,6 +540,7 @@
                 inputField.value = savedAnswer;
                 inputField.readOnly = true;
 
+                // THAY ĐỔI: Khi xem lại/quay lại câu đã làm, hiển thị toàn bộ Cột E (Giải nghĩa/Ví dụ) để hiểu sâu hơn
                 document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
                 
                 const cleanUser = cleanHiragana(savedAnswer);
@@ -520,6 +560,7 @@
                 btn.innerText = 'Tiếp theo';
                 btn.className = 'action-btn btn-next';
             } else {
+                // Mặt trước hiển thị Cột D làm gợi ý đề bài
                 document.getElementById('lbl-meaning').innerText = item.colD ? item.colD : '(Trống dữ liệu cột D)';
                 inputField.value = '';
                 inputField.readOnly = false;
@@ -534,7 +575,6 @@
                 setTimeout(playAudio, 0);
             }
 
-            // ÉP BUỘC TRÌNH DUYỆT GIỮ FOCUS CHO Ô NHẬP ĐỂ PHÍM ENTER HOẠT ĐỘNG LIÊN TỤC
             inputField.focus();
             document.getElementById('lbl-progress').innerText = `CÂU: ${currentIndex + 1} / ${activeSessionData.length}`;
         }
@@ -574,6 +614,7 @@
             isAnswered = true;
             inputField.readOnly = true;
 
+            // Kiểm tra lật mặt sau -> cập nhật hiển thị Cột E ngay lập tức
             document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
 
             const cleanUser = cleanHiragana(rawUserAnswer);
@@ -597,8 +638,6 @@
             btn.className = 'action-btn btn-next';
             
             setTimeout(playAudio, 0);
-            
-            // GIỮ CHẶT FOCUS ĐỂ LẦN BẤM ENTER TIẾP THEO KÍCH HOẠT NEXTQUESTION() NGAY LẬP TỨC
             inputField.focus();
         }
 
@@ -614,7 +653,7 @@
         function previousQuestion() {
             if (currentIndex > 0) {
                 currentIndex--;
-                loadQuestion();
+                loadQuestion(); // Tự động kích hoạt logic tải và hiện cấu trúc mặt sau Cột E nếu câu này đã làm
             }
         }
 
@@ -622,12 +661,10 @@
             startNewSession();
         }
 
-        // Hàm điều hướng nhảy trực tiếp đến từ vựng được nhấp chọn ở bảng kết quả
         function inspectWordFromReport(targetIndex) {
             currentIndex = targetIndex;
             showQuizScreen();
             loadQuestion();
-            // Hiện nút điều hướng nhanh về lại bảng điểm ở thanh công cụ dưới
             document.getElementById('btn-report-nav').style.display = 'inline-block';
         }
 
@@ -653,7 +690,6 @@
 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'report-item';
-                // Thêm sự kiện onclick chuyển tiếp dữ liệu xem chi tiết từ vựng
                 itemDiv.onclick = () => inspectWordFromReport(index);
                 
                 itemDiv.innerHTML = `
@@ -668,10 +704,49 @@
 
             container.appendChild(fragment);
 
+            // Xử lý tạo và lấy nhãn thời gian thực hiện bài kiểm tra
+            const now = new Date();
+            const timeString = now.toTimeString().split(' ')[0];
+
+            // Nếu không phải hành động bấm nút "Xem bảng điểm" quay lại thì mới lưu tích lũy vào Log lịch sử
+            if (!isNavigatingBack) {
+                cumulativeLog.unshift({
+                    time: timeString,
+                    correct: correctCount,
+                    wrong: wrongCount
+                });
+                renderHistoryLog();
+            }
+
+            document.getElementById('lbl-report-time').innerText = `Hoàn thành lúc: ${timeString}`;
             document.getElementById('stat-correct-count').innerText = correctCount;
             document.getElementById('stat-wrong-count').innerText = wrongCount;
             document.getElementById('stat-percent').innerText = Math.round((correctCount / activeSessionData.length) * 100) + '%';
             document.getElementById('lbl-history-summary').innerText = `Tiến trình: Đã bốc ${learnedWordIds.size} / ${globalRawData.length} từ`;
+        }
+
+        // Tạo giao diện danh sách nhật ký cũ tích lũy liên tục dồn về sau
+        function renderHistoryLog() {
+            const logContainer = document.getElementById('history-log-container');
+            logContainer.innerHTML = '';
+            
+            if(cumulativeLog.length === 0) {
+                logContainer.innerHTML = '<div style="font-size:0.8rem;color:#aaa;text-align:center;padding:10px;">Chưa có dữ liệu lượt cũ</div>';
+                return;
+            }
+
+            cumulativeLog.forEach((log, index) => {
+                const logDiv = document.createElement('div');
+                logDiv.className = 'history-log-item';
+                logDiv.innerHTML = `
+                    <div style="color:#5a202d; font-weight:600;">Lượt ${cumulativeLog.length - index} (${log.time})</div>
+                    <div>
+                        <span class="txt-success">Đúng: ${log.correct}</span> | 
+                        <span class="txt-danger">Sai: ${log.wrong}</span>
+                    </div>
+                `;
+                logContainer.appendChild(logDiv);
+            });
         }
 
         function showQuizScreen() {
@@ -684,7 +759,6 @@
             startNewSession();
         }
 
-        // Tối ưu hóa triệt để và khóa chặt luồng nhận diện phím Enter tránh trượt focus bàn phím ảo
         document.getElementById('txt-answer').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault(); 
