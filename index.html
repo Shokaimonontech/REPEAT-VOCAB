@@ -130,18 +130,14 @@
 
         <div id="app-view" style="display: none;">
             <div class="quiz-card">
-                <!-- Hiển thị chữ Kanji -->
                 <div class="kanji-word" id="lbl-kanji">-</div>
-                <!-- Gợi ý ý nghĩa tiếng Việt phía dưới -->
                 <div class="meaning-hint" id="lbl-meaning">-</div>
 
-                <!-- Ô nhập Furigana -->
                 <div class="input-group">
-                    <input type="text" id="txt-answer" placeholder="Nhập cách đọc (Hiragana/Katakana)..." autocomplete="off">
+                    <input type="text" id="txt-answer" placeholder="Nhập cách đọc (Hiragana)..." autocomplete="off">
                     <button class="btn-check" id="btn-action" onclick="handleAction()">Kiểm tra</button>
                 </div>
 
-                <!-- Vùng hiện đúng/sai -->
                 <div class="result-message" id="lbl-result"></div>
                 <div class="correct-answer" id="lbl-correct-answer"></div>
             </div>
@@ -157,7 +153,7 @@
 
         let vocabularyData = [];
         let currentIndex = 0;
-        let isAnswered = false; // Trạng thái câu hỏi (Đã trả lời hay chưa)
+        let isAnswered = false; 
 
         async function fetchSheetsData() {
             try {
@@ -180,24 +176,32 @@
         function parseCSV(text) {
             const lines = text.split('\n').map(line => line.trim()).filter(line => line);
             if (lines.length < 2) return [];
+            
+            // Bỏ hàng 1 (Header), bắt đầu lấy từ hàng 2 trở đi
             return lines.slice(1).map(line => {
                 const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
                 const cleanCells = matches.map(cell => cell.replace(/^"|"$/g, '').trim());
                 return {
-                    word: cleanCells[0] || '',     // Cột 1: Kanji
-                    reading: cleanCells[1] || '',  // Cột 2: Cách đọc (Furigana)
-                    meaning: cleanCells[2] || ''   // Cột 3: Ý nghĩa
+                    colA: cleanCells[0] || '',  // Cột A: Kanji
+                    colB: cleanCells[1] || '',  // Cột B: Cách đọc (Gốc)
+                    colD: cleanCells[3] || '',  // Cột D: Thông tin mặt trước
+                    colE: cleanCells[4] || ''   // Cột E: Thông tin mặt sau
                 };
-            }).filter(item => item.word && item.reading);
+            }).filter(item => item.colA && item.colB);
+        }
+
+        // Hàm loại bỏ dấu ngoặc vuông [...] và khoảng trắng thừa để chỉ lấy phần Hiragana
+        function cleanHiragana(text) {
+            return text.replace(/\[.*?\]/g, '').trim().toLowerCase();
         }
 
         function loadQuestion() {
             isAnswered = false;
             const item = vocabularyData[currentIndex];
             
-            // Hiện đề bài
-            document.getElementById('lbl-kanji').innerText = item.word;
-            document.getElementById('lbl-meaning').innerText = item.meaning ? `Nghĩa: ${item.meaning}` : 'Không có gợi ý nghĩa';
+            // Mặt trước: Hiện thị Cột A và Cột D
+            document.getElementById('lbl-kanji').innerText = item.colA;
+            document.getElementById('lbl-meaning').innerText = item.colD ? item.colD : 'Không có gợi ý';
             
             // Reset ô nhập và thông báo
             const inputField = document.getElementById('txt-answer');
@@ -208,7 +212,7 @@
             document.getElementById('lbl-result').innerText = '';
             document.getElementById('lbl-correct-answer').innerText = '';
             
-            // Đổi nút thành "Kiểm tra"
+            // Thiết lập trạng thái nút kiểm tra
             const btn = document.getElementById('btn-action');
             btn.innerText = 'Kiểm tra';
             btn.className = 'btn-check';
@@ -226,13 +230,17 @@
         }
 
         function checkAnswer() {
-            const userAnswer = document.getElementById('txt-answer').value.trim().toLowerCase();
-            const correctAnswer = vocabularyData[currentIndex].reading.trim().toLowerCase();
-            
-            const resultLbl = document.getElementById('lbl-result');
+            const item = vocabularyData[currentIndex];
             const inputField = document.getElementById('txt-answer');
             
-            if(!userAnswer) {
+            // Lấy dữ liệu thô nhập vào và dọn dẹp sạch dấu ngoặc vuông (nếu người dùng vô tình nhập)
+            const rawUserAnswer = inputField.value;
+            const cleanUser = cleanHiragana(rawUserAnswer);
+            
+            // Dọn sạch dấu ngoặc vuông ở Cột B của hệ thống trước khi đối chiếu
+            const cleanCorrect = cleanHiragana(item.colB);
+            
+            if(!rawUserAnswer.trim()) {
                 alert('Vui lòng nhập cách đọc trước!');
                 return;
             }
@@ -240,14 +248,20 @@
             isAnswered = true;
             inputField.disabled = true;
 
-            // Kiểm tra đáp án (Bỏ qua khoảng trắng thừa)
-            if (userAnswer === correctAnswer) {
+            // Chuyển sang giao diện mặt sau: Cập nhật vùng gợi ý từ Cột D sang Cột E
+            document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : 'Không có thông tin mặt sau';
+
+            const resultLbl = document.getElementById('lbl-result');
+            
+            // So sánh chuỗi Hiragana thuần túy
+            if (cleanUser === cleanCorrect) {
                 resultLbl.innerText = '🎉 CHÍNH XÁC!';
                 resultLbl.className = 'result-message success';
             } else {
                 resultLbl.innerText = '❌ SAI MẤT RỒI!';
                 resultLbl.className = 'result-message error';
-                document.getElementById('lbl-correct-answer').innerText = `Đáp án đúng là: ${vocabularyData[currentIndex].reading}`;
+                // Hiện đáp án đúng gốc ở cột B để người học đối chiếu trực quan
+                document.getElementById('lbl-correct-answer').innerText = `Đáp án đúng là: ${item.colB}`;
             }
 
             // Đổi trạng thái nút thành "Tiếp theo"
@@ -273,7 +287,7 @@
             loadQuestion();
         }
 
-        // Hỗ trợ bấm nút Enter để Kiểm tra / Qua câu tiếp
+        // Hỗ trợ bấm nút Enter để Kiểm tra / Qua câu tiếp nhanh
         document.getElementById('txt-answer').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 handleAction();
