@@ -52,6 +52,7 @@
             color: #7f8c8d;
             margin-bottom: 25px;
             font-style: italic;
+            white-space: pre-line; /* Giúp hiển thị xuống hàng nếu cột D/E có xuống hàng */
         }
 
         .input-group {
@@ -148,7 +149,7 @@
     </div>
 
     <script>
-        // THAY ĐƯỜNG LINK CSV CỦA BẠN VÀO ĐÂY
+        // Đã cập nhật link CSV chính xác từ Google Sheets của bạn
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTy_T9h5patWpbcmmksSOZPsk5dYTUKCAPan9SSME4ReezwI5WJZcsZ_QIQc23D_zcIosPDLc2kkjp6/pub?gid=188188789&single=true&output=csv'; 
 
         let vocabularyData = [];
@@ -169,28 +170,48 @@
                     document.getElementById('loading-view').innerText = 'Không lấy được dữ liệu. Kiểm tra lại file Sheets!';
                 }
             } catch (error) {
-                document.getElementById('loading-view').innerText = 'Lỗi kết nối mạng!';
+                document.getElementById('loading-view').innerText = 'Lỗi kết nối mạng hoặc link Sheets sai cấu trúc!';
             }
         }
 
+        // Hàm phân tách CSV chuẩn, xử lý được cả trường hợp ô dữ liệu chứa dấu phẩy ẩn trong ngoặc kép ""
         function parseCSV(text) {
-            const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+            let lines = [];
+            let row = [""];
+            let inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                let c = text[i];
+                let next = text[i+1];
+                if (c === '"') {
+                    if (inQuotes && next === '"') { row[row.length - 1] += '"'; i++; }
+                    else { inQuotes = !inQuotes; }
+                } else if (c === ',' && !inQuotes) {
+                    row.push('');
+                } else if ((c === '\r' || c === '\n') && !inQuotes) {
+                    if (c === '\r' && next === '\n') { i++; }
+                    lines.push(row);
+                    row = [''];
+                } else {
+                    row[row.length - 1] += c;
+                }
+            }
+            if (row.length > 1 || row[0] !== '') lines.push(row);
             if (lines.length < 2) return [];
-            
-            // Bỏ hàng 1 (Header), bắt đầu lấy từ hàng 2 trở đi
-            return lines.slice(1).map(line => {
-                const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
-                const cleanCells = matches.map(cell => cell.replace(/^"|"$/g, '').trim());
+
+            // Bỏ hàng tiêu đề (index 0) và bắt đầu phân tích từ hàng thứ 2
+            return lines.slice(1).map(cells => {
+                const cleanCells = cells.map(cell => cell.trim());
                 return {
                     colA: cleanCells[0] || '',  // Cột A: Kanji
-                    colB: cleanCells[1] || '',  // Cột B: Cách đọc (Gốc)
-                    colD: cleanCells[3] || '',  // Cột D: Thông tin mặt trước
-                    colE: cleanCells[4] || ''   // Cột E: Thông tin mặt sau
+                    colB: cleanCells[1] || '',  // Cột B: Cách đọc Hiragana
+                    colD: cleanCells[3] || '',  // Cột D: Thông tin hiển thị mặt trước
+                    colE: cleanCells[4] || ''   // Cột E: Thông tin hiển thị mặt sau
                 };
-            }).filter(item => item.colA && item.colB);
+            }).filter(item => item.colA && item.colB); // Bắt buộc phải có Kanji và Cách đọc
         }
 
-        // Hàm loại bỏ dấu ngoặc vuông [...] và khoảng trắng thừa để chỉ lấy phần Hiragana
+        // Hàm lọc sạch: Loại bỏ hoàn toàn dấu ngoặc vuông [...] và nội dung bên trong nó
         function cleanHiragana(text) {
             return text.replace(/\[.*?\]/g, '').trim().toLowerCase();
         }
@@ -199,11 +220,11 @@
             isAnswered = false;
             const item = vocabularyData[currentIndex];
             
-            // Mặt trước: Hiện thị Cột A và Cột D
+            // Mặt trước: Hiển thị dữ liệu của Cột A và Cột D
             document.getElementById('lbl-kanji').innerText = item.colA;
-            document.getElementById('lbl-meaning').innerText = item.colD ? item.colD : 'Không có gợi ý';
+            document.getElementById('lbl-meaning').innerText = item.colD ? item.colD : '(Trống dữ liệu cột D)';
             
-            // Reset ô nhập và thông báo
+            // Khởi tạo lại ô nhập và thông báo ẩn
             const inputField = document.getElementById('txt-answer');
             inputField.value = '';
             inputField.disabled = false;
@@ -212,12 +233,12 @@
             document.getElementById('lbl-result').innerText = '';
             document.getElementById('lbl-correct-answer').innerText = '';
             
-            // Thiết lập trạng thái nút kiểm tra
+            // Thiết lập trạng thái nút về trạng thái kiểm tra
             const btn = document.getElementById('btn-action');
             btn.innerText = 'Kiểm tra';
             btn.className = 'btn-check';
 
-            // Cập nhật tiến độ
+            // Hiển thị tiến độ câu hỏi hiện tại
             document.getElementById('lbl-progress').innerText = `Câu: ${currentIndex + 1} / ${vocabularyData.length}`;
         }
 
@@ -233,11 +254,9 @@
             const item = vocabularyData[currentIndex];
             const inputField = document.getElementById('txt-answer');
             
-            // Lấy dữ liệu thô nhập vào và dọn dẹp sạch dấu ngoặc vuông (nếu người dùng vô tình nhập)
             const rawUserAnswer = inputField.value;
+            // Làm sạch câu trả lời người dùng và đáp án cột B (bỏ dấu ngoặc vuông để so sánh)
             const cleanUser = cleanHiragana(rawUserAnswer);
-            
-            // Dọn sạch dấu ngoặc vuông ở Cột B của hệ thống trước khi đối chiếu
             const cleanCorrect = cleanHiragana(item.colB);
             
             if(!rawUserAnswer.trim()) {
@@ -248,23 +267,23 @@
             isAnswered = true;
             inputField.disabled = true;
 
-            // Chuyển sang giao diện mặt sau: Cập nhật vùng gợi ý từ Cột D sang Cột E
-            document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : 'Không có thông tin mặt sau';
+            // KHI LẬT MẶT SAU: Thay đổi nội dung hiển thị từ Cột D sang Cột E
+            document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
 
             const resultLbl = document.getElementById('lbl-result');
             
-            // So sánh chuỗi Hiragana thuần túy
+            // Thực hiện đối chiếu chuỗi Hiragana thuần
             if (cleanUser === cleanCorrect) {
                 resultLbl.innerText = '🎉 CHÍNH XÁC!';
                 resultLbl.className = 'result-message success';
             } else {
                 resultLbl.innerText = '❌ SAI MẤT RỒI!';
                 resultLbl.className = 'result-message error';
-                // Hiện đáp án đúng gốc ở cột B để người học đối chiếu trực quan
+                // Hiện đáp án gốc chứa cả dấu ngoặc (nếu có) từ cột B để người học dễ so sánh và ghi nhớ cấu trúc từ
                 document.getElementById('lbl-correct-answer').innerText = `Đáp án đúng là: ${item.colB}`;
             }
 
-            // Đổi trạng thái nút thành "Tiếp theo"
+            // Chuyển nút bấm sang trạng thái qua câu tiếp
             const btn = document.getElementById('btn-action');
             btn.innerText = 'Tiếp theo';
             btn.className = 'btn-next';
@@ -275,7 +294,7 @@
                 currentIndex++;
                 loadQuestion();
             } else {
-                alert('Chúc mừng! Bạn đã hoàn thành hết bộ từ vựng.');
+                alert('Chúc mừng! Bạn đã hoàn thành xong bộ từ vựng hiện tại.');
                 currentIndex = 0;
                 loadQuestion();
             }
@@ -287,7 +306,7 @@
             loadQuestion();
         }
 
-        // Hỗ trợ bấm nút Enter để Kiểm tra / Qua câu tiếp nhanh
+        // Kích hoạt phím Enter để thao tác nhanh mà không cần click chuột
         document.getElementById('txt-answer').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 handleAction();
