@@ -326,7 +326,6 @@
             text-align: center;
         }
 
-        /* Lịch sử lưu trữ tích lũy */
         .history-section-title {
             font-size: 0.95rem;
             font-weight: 700;
@@ -352,6 +351,18 @@
             font-weight: 500;
         }
         .history-log-item:last-child { border-bottom: none; }
+
+        .clear-btn {
+            background: none;
+            border: none;
+            color: #a38d91;
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+            float: right;
+            margin-top: 2px;
+        }
 
         .loading { 
             font-size: 1.2rem; 
@@ -412,13 +423,15 @@
                 <div class="stat-wrong">Sai: <span id="stat-wrong-count">0</span></div>
                 <div style="color: #5a4b4d;">Tỷ lệ: <span id="stat-percent">0%</span></div>
             </div>
-            <div style="font-size: 0.8rem; margin-bottom: 8px; font-weight: 600; text-align: center; color: #a38d91;">👉 Bấm vào từng từ để xem chi tiết ý nghĩa</div>
+            <div style="font-size: 0.8rem; margin-bottom: 8px; font-weight: 600; text-align: center; color: #a38d91;">👉 Bấm vào từng từ để xem lại chi tiết ý nghĩa</div>
             
             <div class="report-list" id="report-list-container"></div>
             
-            <div class="history-section-title">Nhật ký các lượt làm cũ 📜</div>
-            <div class="history-log-container" id="history-log-container">
-                </div>
+            <div class="history-section-title">
+                Nhật ký các lượt làm cũ 📜
+                <button class="clear-btn" onclick="clearHistoryLog()">Xóa lịch sử</button>
+            </div>
+            <div class="history-log-container" id="history-log-container"></div>
             <br>
             <button class="action-btn btn-next" onclick="restartSessionFromReport()">Tiếp tục lượt mới 🌸</button>
         </div>
@@ -431,11 +444,17 @@
         let activeSessionData = []; 
         let userAnswersHistory = [];
         let learnedWordIds = new Set(); 
-        let cumulativeLog = []; // Lưu trữ lịch sử tất cả các lượt làm bài
+        let cumulativeLog = []; 
         let currentIndex = 0;
         let isAnswered = false; 
 
         async function fetchSheetsData() {
+            // Tải lại nhật ký làm bài từ bộ nhớ localStorage ngay khi mở ứng dụng
+            const savedLog = localStorage.getItem('furigana_quiz_history');
+            if (savedLog) {
+                try { cumulativeLog = JSON.parse(savedLog); } catch(e) { cumulativeLog = []; }
+            }
+
             try {
                 const response = await fetch(SHEET_CSV_URL);
                 const csvText = await response.text();
@@ -534,13 +553,14 @@
             
             document.getElementById('btn-back').disabled = (currentIndex === 0);
 
+            // CẬP NHẬT: Nếu câu này đã được điền từ trước HOẶC người dùng bấm xem lại từ bảng tổng kết công khai
             if (userAnswersHistory[currentIndex] !== null) {
                 isAnswered = true;
                 const savedAnswer = userAnswersHistory[currentIndex];
                 inputField.value = savedAnswer;
                 inputField.readOnly = true;
 
-                // THAY ĐỔI: Khi xem lại/quay lại câu đã làm, hiển thị toàn bộ Cột E (Giải nghĩa/Ví dụ) để hiểu sâu hơn
+                // LUÔN HIỂN THỊ ĐỦ NGHĨA (Cột E) khi xem lại bất kể đúng sai
                 document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
                 
                 const cleanUser = cleanHiragana(savedAnswer);
@@ -560,7 +580,6 @@
                 btn.innerText = 'Tiếp theo';
                 btn.className = 'action-btn btn-next';
             } else {
-                // Mặt trước hiển thị Cột D làm gợi ý đề bài
                 document.getElementById('lbl-meaning').innerText = item.colD ? item.colD : '(Trống dữ liệu cột D)';
                 inputField.value = '';
                 inputField.readOnly = false;
@@ -614,7 +633,6 @@
             isAnswered = true;
             inputField.readOnly = true;
 
-            // Kiểm tra lật mặt sau -> cập nhật hiển thị Cột E ngay lập tức
             document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
 
             const cleanUser = cleanHiragana(rawUserAnswer);
@@ -653,7 +671,7 @@
         function previousQuestion() {
             if (currentIndex > 0) {
                 currentIndex--;
-                loadQuestion(); // Tự động kích hoạt logic tải và hiện cấu trúc mặt sau Cột E nếu câu này đã làm
+                loadQuestion(); 
             }
         }
 
@@ -704,19 +722,20 @@
 
             container.appendChild(fragment);
 
-            // Xử lý tạo và lấy nhãn thời gian thực hiện bài kiểm tra
             const now = new Date();
             const timeString = now.toTimeString().split(' ')[0];
 
-            // Nếu không phải hành động bấm nút "Xem bảng điểm" quay lại thì mới lưu tích lũy vào Log lịch sử
+            // TỐI ƯU: Lưu trữ đồng bộ vào localStorage để không bị mất khi reload/qua lượt mới
             if (!isNavigatingBack) {
                 cumulativeLog.unshift({
                     time: timeString,
                     correct: correctCount,
                     wrong: wrongCount
                 });
-                renderHistoryLog();
+                localStorage.setItem('furigana_quiz_history', JSON.stringify(cumulativeLog));
             }
+            
+            renderHistoryLog();
 
             document.getElementById('lbl-report-time').innerText = `Hoàn thành lúc: ${timeString}`;
             document.getElementById('stat-correct-count').innerText = correctCount;
@@ -725,7 +744,6 @@
             document.getElementById('lbl-history-summary').innerText = `Tiến trình: Đã bốc ${learnedWordIds.size} / ${globalRawData.length} từ`;
         }
 
-        // Tạo giao diện danh sách nhật ký cũ tích lũy liên tục dồn về sau
         function renderHistoryLog() {
             const logContainer = document.getElementById('history-log-container');
             logContainer.innerHTML = '';
@@ -747,6 +765,15 @@
                 `;
                 logContainer.appendChild(logDiv);
             });
+        }
+
+        // Thêm tính năng xóa lịch sử lưu trữ tích lũy nếu muốn làm sạch bộ nhớ
+        function clearHistoryLog() {
+            if (confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử các lượt cũ không?')) {
+                cumulativeLog = [];
+                localStorage.removeItem('furigana_quiz_history');
+                renderHistoryLog();
+            }
         }
 
         function showQuizScreen() {
