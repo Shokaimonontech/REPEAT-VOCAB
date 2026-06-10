@@ -65,7 +65,6 @@
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Class kích hoạt trạng thái lật mặt sau */
         .quiz-card.is-flipped {
             transform: rotateY(180deg);
         }
@@ -86,17 +85,13 @@
             align-items: center;
         }
 
-        .card-front {
-            background: rgba(255, 255, 255, 0.9);
-        }
-
+        .card-front { background: rgba(255, 255, 255, 0.9); }
         .card-back {
             background: rgba(255, 245, 247, 0.95);
             transform: rotateY(180deg);
             border: 2px solid var(--sakura-primary);
         }
 
-        /* --- AUDIO BUTTON --- */
         .audio-btn {
             position: absolute;
             top: 16px;
@@ -113,28 +108,16 @@
             z-index: 10;
         }
 
-        .audio-btn svg {
-            width: 18px;
-            height: 18px;
-            fill: var(--sakura-dark);
-        }
-
-        .kanji-word {
-            font-size: 3.2rem;
-            font-weight: 800;
-            color: #2c1a1d;
-            margin-bottom: 12px;
-            letter-spacing: 1px;
-            line-height: 1.2;
-            text-align: center;
-        }
+        .audio-btn svg { width: 18px; height: 18px; fill: var(--sakura-dark); }
+        .kanji-word { font-size: 3.2rem; font-weight: 800; color: #2c1a1d; margin-bottom: 12px; letter-spacing: 1px; line-height: 1.2; text-align: center; }
 
         .meaning-hint {
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             color: #4a3336;
             background: rgba(255, 255, 255, 0.7);
             padding: 12px 16px;
             border-radius: 16px;
+            margin-bottom: 30px;
             font-weight: 500;
             white-space: pre-line;
             line-height: 1.5;
@@ -153,11 +136,7 @@
             margin-bottom: 20px;
         }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        .input-group { display: flex; flex-direction: column; gap: 12px; }
 
         input[type="text"] {
             width: 100%;
@@ -179,10 +158,7 @@
             background: #fff;
         }
 
-        input[type="text"]:read-only {
-            background: rgba(230, 230, 230, 0.5);
-            color: #555;
-        }
+        input[type="text"]:read-only { background: rgba(230, 230, 230, 0.5); color: #555; }
 
         button.action-btn {
             width: 100%;
@@ -195,17 +171,13 @@
             letter-spacing: 0.5px;
             transition: all 0.2s ease;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
         }
 
         .btn-check { background: var(--sakura-primary); color: white; }
         .btn-next { background: var(--sakura-dark); color: white; }
 
-        .nav-actions {
-            display: flex;
-            width: 100%;
-            gap: 12px;
-            margin-top: 5px;
-        }
+        .nav-actions { display: flex; width: 100%; gap: 12px; margin-top: 5px; }
 
         .btn-sub {
             background: rgba(255, 255, 255, 0.7);
@@ -236,7 +208,7 @@
             border: 1px dashed var(--sakura-primary);
         }
 
-        .progress { color: #a38d91; font-size: 0.9rem; font-weight: 600; margin-top: 15px; }
+        .progress { color: #a38d91; font-size: 0.9rem; font-weight: 600; margin-top: 15px; text-align: center; }
 
         /* --- REPORT VIEW --- */
         .report-view {
@@ -259,15 +231,42 @@
             font-weight: 700;
         }
 
-        .report-list { max-height: 240px; overflow-y: auto; margin-bottom: 15px; }
+        .report-list { max-height: 260px; overflow-y: auto; margin-bottom: 15px; }
+        
         .report-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.05);
-            font-size: 0.95rem; cursor: pointer; border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-size: 0.95rem;
+            border-radius: 8px;
+            background: transparent;
+            margin-bottom: 4px;
         }
-        .report-item:active { background: rgba(255, 183, 197, 0.15); }
+        
+        .report-item-clickable {
+            cursor: pointer;
+            flex-grow: 1;
+        }
 
-        /* --- KHU VỰC LỊCH SỬ CỐ ĐỊNH LUÔN XUẤT HIỆN --- */
+        .anki-link-btn {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-left: 8px;
+            transition: background 0.2s;
+        }
+        .anki-link-btn:active { background: #357abd; }
+
+        /* --- KHU VỰC LỊCH SỬ CỐ ĐỊNH LUÔN XUẤT HIỆN Ở DƯỚI CÙNG --- */
         .permanent-history-wrapper {
             width: 100%;
             background: rgba(255, 255, 255, 0.7);
@@ -323,10 +322,12 @@
 
         <div id="loading-view" class="loading">Đang kết nối thư viện từ vựng...</div>
 
+        <!-- QUIZ SCREEN -->
         <div id="app-view" style="display: none; width: 100%;">
             <div class="flashcard-wrapper">
                 <div class="quiz-card" id="flashcard" onclick="toggleManualFlip()">
                     
+                    <!-- MẶT TRƯỚC (FRONT) -->
                     <div class="card-face card-front">
                         <button class="audio-btn" onclick="event.stopPropagation(); playAudio();" title="Nghe phát âm">
                             <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
@@ -335,6 +336,7 @@
                         <div class="meaning-hint" id="lbl-meaning-front">-</div>
                     </div>
 
+                    <!-- MẶT SAU (BACK) -->
                     <div class="card-face card-back">
                         <button class="audio-btn" onclick="event.stopPropagation(); playAudio();" title="Nghe phát âm">
                             <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
@@ -349,6 +351,7 @@
                 </div>
             </div>
 
+            <!-- NHÓM ĐIỀN ĐÁP ÁN VÀ ĐIỀU HƯỚNG -->
             <div class="input-area-wrapper">
                 <div class="input-group">
                     <input type="text" id="txt-answer" placeholder="Nhập cách đọc Hiragana..." autocomplete="off" inputmode="search">
@@ -363,6 +366,7 @@
             </div>
         </div>
 
+        <!-- MÀN HÌNH BÁO CÁO KẾT QUẢ -->
         <div id="report-view" class="report-view" style="display: none;">
             <div class="report-header">Kết Quả Lượt Học 🎉</div>
             <div class="report-time" id="lbl-report-time">--:--:--</div>
@@ -371,11 +375,12 @@
                 <div class="stat-wrong">Sai: <span id="stat-wrong-count">0</span></div>
                 <div style="color: #5a4b4d;">Tỷ lệ: <span id="stat-percent">0%</span></div>
             </div>
-            <div style="font-size: 0.8rem; margin-bottom: 8px; font-weight: 600; text-align: center; color: #a38d91;">👉 Bấm vào từng từ dưới đây để tự lật xem chi tiết ý nghĩa</div>
+            <div style="font-size: 0.8rem; margin-bottom: 8px; font-weight: 600; text-align: center; color: #a38d91;">👉 Bấm vào từng từ để xem lại, hoặc bấm "Anki" để mở thẻ</div>
             <div class="report-list" id="report-list-container"></div>
             <button class="action-btn btn-next" onclick="restartSessionFromReport()">Tiếp tục lượt mới 🌸</button>
         </div>
 
+        <!-- BẢNG NHẬT KÝ LỊCH SỬ CỐ ĐỊNH (LUÔN LUÔN HIỂN THỊ Ở DƯỚI CÙNG TRANG) -->
         <div class="permanent-history-wrapper">
             <div class="history-section-title">
                 <span>Nhật ký học tập tích lũy 📜</span>
@@ -484,10 +489,8 @@
             const item = activeSessionData[currentIndex];
             const card = document.getElementById('flashcard');
             
-            // Đưa thẻ về mặt trước ban đầu khi tải câu hỏi
             card.classList.remove('is-flipped');
 
-            // Cập nhật thông tin đồng bộ cả 2 mặt vật lý Front & Back
             document.getElementById('lbl-kanji-front').innerText = item.colA;
             document.getElementById('lbl-meaning-front').innerText = item.colD ? item.colD : '(Trống dữ liệu cột D)';
             document.getElementById('lbl-meaning-back').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
@@ -499,7 +502,6 @@
             
             document.getElementById('btn-back').disabled = (currentIndex === 0);
 
-            // Nếu câu này đã trả lời (khi bấm quay lại hoặc chuyển từ bảng báo cáo)
             if (userAnswersHistory[currentIndex] !== null) {
                 isAnswered = true;
                 const savedAnswer = userAnswersHistory[currentIndex];
@@ -517,14 +519,11 @@
                     resultLbl.className = 'result-message error';
                 }
                 correctDisplay.innerText = `${item.colA} = ${getTargetReading(item.colB)}`;
-
-                // Tự động lật mặt sau để xem lại thông tin đầy đủ
                 card.classList.add('is-flipped');
 
                 btn.innerText = 'Tiếp theo';
                 btn.className = 'action-btn btn-next';
             } else {
-                // Trạng thái câu mới hoàn toàn
                 inputField.value = '';
                 inputField.readOnly = false;
                 resultLbl.innerText = '';
@@ -541,7 +540,6 @@
             document.getElementById('lbl-history-summary').innerText = `Tiến trình: Đã bốc ${learnedWordIds.size} / ${globalRawData.length} từ`;
         }
 
-        // CHỈ CHO PHÉP LẬT THỦ CÔNG BẰNG CHẠM TAY KHI CÂU ĐÓ ĐÃ ĐƯỢC TRẢ LỜI 
         function toggleManualFlip() {
             if (isAnswered) {
                 document.getElementById('flashcard').classList.toggle('is-flipped');
@@ -595,8 +593,6 @@
                 resultLbl.className = 'result-message error';
             }
             correctDisplay.innerText = `${item.colA} = ${getTargetReading(item.colB)}`;
-
-            // Kích hoạt hiệu ứng lật 3D ra mặt sau hiển thị Cột E
             document.getElementById('flashcard').classList.add('is-flipped');
 
             const btn = document.getElementById('btn-action');
@@ -605,11 +601,6 @@
             
             setTimeout(playAudio, 0);
             inputField.focus();
-        }
-
-        function AnnapolisFocus() {
-            // Đảm bảo nút input giữ được tương tác bàn phím ảo di động
-            document.getElementById('txt-answer').focus();
         }
 
         function nextQuestion() {
@@ -657,15 +648,22 @@
                 const isCorrect = (cleanUser === cleanCorrect && cleanCorrect !== '');
                 if (isCorrect) correctCount++; else wrongCount++;
 
+                // Tạo khung report item chứa phần text nhấp xem lại và nút gọi Anki
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'report-item';
-                itemDiv.onclick = () => inspectWordFromReport(index);
+                
+                // Mã hóa chữ Kanji để chèn vào URL anki://
+                const encodedKanji = encodeURIComponent(item.colA);
                 
                 itemDiv.innerHTML = `
-                    <div class="item-kanji">${index + 1}. ${item.colA}</div>
+                    <div class="report-item-clickable" onclick="inspectWordFromReport(${index})">
+                        <span class="item-kanji">${index + 1}. ${item.colA}</span>
+                        <span style="color: #777; font-size: 0.85rem; margin-left: 8px;">👉 Xem lại</span>
+                    </div>
                     <div class="item-details">
-                        <div class="${isCorrect ? 'txt-success' : 'txt-danger'}">${isCorrect ? 'Đúng' : 'Sai'}</div>
-                        <div style="color: #777;">Nhập: ${userAns || '(Trống)'} | ĐÚNG: ${targetRead}</div>
+                        <span class="${isCorrect ? 'txt-success' : 'txt-danger'}">${isCorrect ? 'Đúng' : 'Sai'}</span>
+                        <!-- URL Scheme gọi App Anki mở ô tìm kiếm từ vựng -->
+                        <a href="anki://search?q=${encodedKanji}" class="anki-link-btn" onclick="event.stopPropagation();">Anki</a>
                     </div>
                 `;
                 fragment.appendChild(itemDiv);
@@ -708,6 +706,9 @@
                 `;
                 logContainer.appendChild(logDiv);
             });
+            
+            // Cập nhật nhãn đếm tổng số từ đã bốc tích lũy
+            document.getElementById('lbl-history-summary').innerText = `Tiến trình: Đã bốc ${learnedWordIds.size} / ${globalRawData.length} từ`;
         }
 
         function clearHistoryLog() {
