@@ -103,7 +103,6 @@
             text-align: center;
         }
 
-        /* Định dạng lại Cột D, E dễ nhìn và nổi bật hơn */
         .meaning-hint {
             font-size: 1.1rem;
             color: #4a3336;
@@ -136,7 +135,7 @@
             text-align: center;
             background: rgba(255, 255, 255, 0.9);
             color: #2c1a1d;
-            transition: all 0.3s ease;
+            transition: all 0.15s ease;
             font-weight: 500;
         }
 
@@ -160,7 +159,7 @@
             cursor: pointer;
             font-weight: 700;
             letter-spacing: 0.5px;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: all 0.2s ease;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             text-align: center;
         }
@@ -170,19 +169,9 @@
             color: white;
         }
 
-        .btn-check:active {
-            transform: scale(0.98);
-            background: #ffa4b5;
-        }
-
         .btn-next {
             background: var(--sakura-dark);
             color: white;
-        }
-
-        .btn-next:active {
-            transform: scale(0.98);
-            background: #5a202d;
         }
 
         .nav-actions {
@@ -204,7 +193,7 @@
             flex: 1;
             cursor: pointer;
             text-align: center;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
         }
 
         .btn-sub:active {
@@ -253,7 +242,6 @@
             text-align: center;
         }
 
-        /* CSS giao diện Báo cáo kết quả */
         .report-view {
             background: rgba(255, 255, 255, 0.9);
             width: 100%;
@@ -364,11 +352,9 @@
                 <div class="stat-wrong">Sai: <span id="stat-wrong-count">0</span></div>
                 <div style="color: #5a4b4d;">Tỷ lệ: <span id="stat-percent">0%</span></div>
             </div>
-            <div class="report-list" id="report-list-container">
-                </div>
+            <div class="report-list" id="report-list-container"></div>
             <button class="action-btn btn-next" onclick="restartSessionFromReport()">Tiếp tục lượt mới 🌸</button>
         </div>
-
     </div>
 
     <script>
@@ -502,11 +488,11 @@
                 btn.innerText = 'Kiểm tra';
                 btn.className = 'action-btn btn-check';
                 
-                // Phát âm thanh tự động ở mặt trước
-                playAudio();
+                // Phát âm thanh bất đồng bộ, không chặn luồng giao diện
+                setTimeout(playAudio, 0);
             }
 
-            setTimeout(() => { inputField.focus(); }, 50);
+            inputField.focus();
             document.getElementById('lbl-progress').innerText = `CÂU: ${currentIndex + 1} / ${activeSessionData.length}`;
         }
 
@@ -518,7 +504,7 @@
                 
                 const utterance = new SpeechSynthesisUtterance(rawReading);
                 utterance.lang = 'ja-JP';
-                utterance.rate = 0.85; 
+                utterance.rate = 0.88; 
                 window.speechSynthesis.speak(utterance);
             }
         }
@@ -567,9 +553,8 @@
             btn.innerText = 'Tiếp theo';
             btn.className = 'action-btn btn-next';
             
-            // Tự động phát lại âm thanh khi chuyển sang mặt sau kết quả
-            playAudio();
-
+            // Phát âm phát lại ở mặt sau chạy không đồng bộ nền
+            setTimeout(playAudio, 0);
             inputField.focus();
         }
 
@@ -578,7 +563,7 @@
                 currentIndex++;
                 loadQuestion();
             } else {
-                showReportScreen(); // Hết 20 câu -> Chuyển sang màn hình báo cáo tổng kết
+                showReportScreen(); 
             }
         }
 
@@ -593,7 +578,6 @@
             startNewSession();
         }
 
-        // Tạo danh sách lịch sử chi tiết cho bảng báo cáo
         function showReportScreen() {
             document.getElementById('app-view').style.display = 'none';
             document.getElementById('report-view').style.display = 'block';
@@ -601,7 +585,10 @@
             let correctCount = 0;
             let wrongCount = 0;
             const container = document.getElementById('report-list-container');
-            container.innerHTML = ''; // Clear dữ liệu cũ
+            container.innerHTML = ''; 
+
+            // Sử dụng DocumentFragment để tối ưu hóa render danh sách báo cáo siêu nhanh
+            const fragment = document.createDocumentFragment();
 
             activeSessionData.forEach((item, index) => {
                 const userAns = userAnswersHistory[index];
@@ -612,10 +599,8 @@
                 const isCorrect = (cleanUser === cleanCorrect && cleanCorrect !== '');
                 if (isCorrect) correctCount++; else wrongCount++;
 
-                // Tạo element dòng dữ liệu
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'report-item';
-                
                 itemDiv.innerHTML = `
                     <div class="item-kanji">${index + 1}. ${item.colA}</div>
                     <div class="item-details">
@@ -623,10 +608,11 @@
                         <div style="color: #777;">Nhập: ${userAns || '(Trống)'} | ĐÚNG: ${targetRead}</div>
                     </div>
                 `;
-                container.appendChild(itemDiv);
+                fragment.appendChild(itemDiv);
             });
 
-            // Gán các số liệu thống kê
+            container.appendChild(fragment);
+
             document.getElementById('stat-correct-count').innerText = correctCount;
             document.getElementById('stat-wrong-count').innerText = wrongCount;
             document.getElementById('stat-percent').innerText = Math.round((correctCount / activeSessionData.length) * 100) + '%';
@@ -642,6 +628,7 @@
             startNewSession();
         }
 
+        // Tối ưu hóa triệt để sự kiện Keydown lướt mượt mà không khựng bàn phím
         document.getElementById('txt-answer').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault(); 
