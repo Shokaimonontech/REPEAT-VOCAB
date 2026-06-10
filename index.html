@@ -2,154 +2,239 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ôn tập Furigana JLPT N1</title>
     <style>
         :root {
-            --primary-color: #4a90e2;
+            --sakura-primary: #ffb7c5;
+            --sakura-dark: #742a3a;
+            --sakura-light: #fff0f5;
             --success-color: #2ecc71;
             --error-color: #e74c3c;
-            --background-color: #f5f7fa;
-            --card-color: #ffffff;
+            --bg-gradient: linear-gradient(135deg, #fff5f6 0%, #ffe3e8 100%);
+            --card-shadow: 0 20px 40px rgba(255, 183, 197, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-gradient);
             margin: 0;
-            padding: 20px;
+            padding: 16px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--sakura-dark);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        .container {
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-            margin-top: 30px;
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 24px;
+            color: var(--sakura-dark);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         .quiz-card {
-            background: var(--card-color);
-            padding: 30px 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            border: 2px solid #eef2f5;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            width: 100%;
+            padding: 40px 24px 32px 24px;
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             margin-bottom: 20px;
+            text-align: center;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .kanji-word {
-            font-size: 42px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: #2c1a1d;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            line-height: 1.2;
         }
 
         .meaning-hint {
-            font-size: 18px;
-            color: #7f8c8d;
-            margin-bottom: 25px;
-            font-style: italic;
-            white-space: pre-line; /* Giúp hiển thị xuống hàng nếu cột D/E có xuống hàng */
+            font-size: 1.1rem;
+            color: #8b6d73;
+            margin-bottom: 35px;
+            font-weight: 400;
+            white-space: pre-line;
+            line-height: 1.5;
         }
 
         .input-group {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
         input[type="text"] {
-            flex: 1;
-            padding: 12px 15px;
-            font-size: 18px;
-            border: 2px solid #bdc3c7;
-            border-radius: 8px;
+            width: 100%;
+            padding: 16px;
+            font-size: 1.2rem;
+            border: 2px solid rgba(255, 183, 197, 0.4);
+            border-radius: 16px;
             outline: none;
             text-align: center;
-            transition: border 0.2s;
+            background: rgba(255, 255, 255, 0.9);
+            color: #2c1a1d;
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
 
         input[type="text"]:focus {
-            border-color: var(--primary-color);
+            border-color: var(--sakura-primary);
+            box-shadow: 0 0 0 4px rgba(255, 183, 197, 0.2);
+            background: #fff;
+        }
+
+        input[type="text"]::placeholder {
+            color: #cbc0c2;
+            font-size: 1rem;
         }
 
         button {
-            padding: 12px 24px;
-            font-size: 16px;
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 16px;
             cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         .btn-check {
-            background-color: var(--primary-color);
+            background: var(--sakura-primary);
             color: white;
         }
 
+        .btn-check:active {
+            transform: scale(0.98);
+            background: #ffa4b5;
+        }
+
         .btn-next {
-            background-color: #34495e;
+            background: var(--sakura-dark);
             color: white;
+        }
+
+        .btn-next:active {
+            transform: scale(0.98);
+            background: #5a202d;
+        }
+
+        .btn-shuffle {
+            background: transparent;
+            color: var(--sakura-dark);
+            border: 1.5px solid var(--sakura-primary);
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 14px;
+            width: auto;
+            box-shadow: none;
+        }
+
+        .btn-shuffle:active {
+            background: rgba(255, 183, 197, 0.1);
         }
 
         /* Kết quả */
         .result-message {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 15px;
-            min-height: 27px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-top: 16px;
+            min-height: 28px;
+            letter-spacing: 0.5px;
         }
 
         .success { color: var(--success-color); }
         .error { color: var(--error-color); }
 
         .correct-answer {
-            font-size: 16px;
-            color: #555;
-            margin-top: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #5a4b4d;
+            margin-top: 8px;
+            background: var(--sakura-light);
+            padding: 10px 14px;
+            border-radius: 10px;
+            display: inline-block;
         }
 
         .progress {
-            color: #95a5a6;
-            font-size: 14px;
-            margin-top: 20px;
+            color: #a38d91;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 24px;
+            letter-spacing: 1px;
         }
 
-        .loading { font-size: 18px; color: #666; margin-top: 50px; }
+        .loading { 
+            font-size: 1.2rem; 
+            color: var(--sakura-dark); 
+            font-weight: 600;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>Kiểm tra Furigana (Cách đọc)</h2>
+        <h2>Furigana Quiz 🌸</h2>
 
-        <div id="loading-view" class="loading">Đang kết nối dữ liệu Google Sheets...</div>
+        <div id="loading-view" class="loading">Đang tải dữ liệu hoa anh đào...</div>
 
-        <div id="app-view" style="display: none;">
+        <div id="app-view" style="display: none; width: 100%;">
             <div class="quiz-card">
                 <div class="kanji-word" id="lbl-kanji">-</div>
                 <div class="meaning-hint" id="lbl-meaning">-</div>
 
                 <div class="input-group">
-                    <input type="text" id="txt-answer" placeholder="Nhập cách đọc (Hiragana)..." autocomplete="off">
+                    <input type="text" id="txt-answer" placeholder="Nhập cách đọc Hiragana..." autocomplete="off" inputmode="search">
                     <button class="btn-check" id="btn-action" onclick="handleAction()">Kiểm tra</button>
                 </div>
 
                 <div class="result-message" id="lbl-result"></div>
-                <div class="correct-answer" id="lbl-correct-answer"></div>
+                <div class="correct-answer" id="lbl-correct-answer" style="display: none;"></div>
             </div>
 
-            <button onclick="shuffleCards()" style="background: #95a5a6; color: white;">Trộn ngẫu nhiên</button>
+            <button class="btn-shuffle" onclick="shuffleCards()">Trộn ngẫu nhiên</button>
             <div class="progress" id="lbl-progress">0 / 0</div>
         </div>
     </div>
 
     <script>
-        // Đã cập nhật link CSV chính xác từ Google Sheets của bạn
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTy_T9h5patWpbcmmksSOZPsk5dYTUKCAPan9SSME4ReezwI5WJZcsZ_QIQc23D_zcIosPDLc2kkjp6/pub?gid=188188789&single=true&output=csv'; 
 
         let vocabularyData = [];
@@ -170,11 +255,10 @@
                     document.getElementById('loading-view').innerText = 'Không lấy được dữ liệu. Kiểm tra lại file Sheets!';
                 }
             } catch (error) {
-                document.getElementById('loading-view').innerText = 'Lỗi kết nối mạng hoặc link Sheets sai cấu trúc!';
+                document.getElementById('loading-view').innerText = 'Lỗi kết nối mạng!';
             }
         }
 
-        // Hàm phân tách CSV chuẩn, xử lý được cả trường hợp ô dữ liệu chứa dấu phẩy ẩn trong ngoặc kép ""
         function parseCSV(text) {
             let lines = [];
             let row = [""];
@@ -199,47 +283,49 @@
             if (row.length > 1 || row[0] !== '') lines.push(row);
             if (lines.length < 2) return [];
 
-            // Bỏ hàng tiêu đề (index 0) và bắt đầu phân tích từ hàng thứ 2
             return lines.slice(1).map(cells => {
                 const cleanCells = cells.map(cell => cell.trim());
                 return {
-                    colA: cleanCells[0] || '',  // Cột A: Kanji
-                    colB: cleanCells[1] || '',  // Cột B: Cách đọc Hiragana
-                    colD: cleanCells[3] || '',  // Cột D: Thông tin hiển thị mặt trước
-                    colE: cleanCells[4] || ''   // Cột E: Thông tin hiển thị mặt sau
+                    colA: cleanCells[0] || '',  
+                    colB: cleanCells[1] || '',  
+                    colD: cleanCells[3] || '',  
+                    colE: cleanCells[4] || ''   
                 };
-            }).filter(item => item.colA && item.colB); // Bắt buộc phải có Kanji và Cách đọc
+            }).filter(item => item.colA && item.colB);
         }
 
-        // Hàm lọc sạch: Loại bỏ hoàn toàn dấu ngoặc vuông [...] và nội dung bên trong nó
+        // Hàm lọc chuẩn: Chỉ giữ lại các ký tự Hiragana và Katakana, loại bỏ tất cả chữ Latinh (THANH XUÂN) hay dấu ngoặc [...]
         function cleanHiragana(text) {
-            return text.replace(/\[.*?\]/g, '').trim().toLowerCase();
+            // Regex giữ lại các ký tự trong phân vùng Unicode của Hiragana (\u3040-\u309F) và Katakana (\u30A0-\u30FF)
+            const matches = text.match(/[\u3040-\u309F\u30A0-\u30FF]+/g);
+            return matches ? matches.join('').trim() : '';
         }
 
         function loadQuestion() {
             isAnswered = false;
             const item = vocabularyData[currentIndex];
             
-            // Mặt trước: Hiển thị dữ liệu của Cột A và Cột D
             document.getElementById('lbl-kanji').innerText = item.colA;
             document.getElementById('lbl-meaning').innerText = item.colD ? item.colD : '(Trống dữ liệu cột D)';
             
-            // Khởi tạo lại ô nhập và thông báo ẩn
             const inputField = document.getElementById('txt-answer');
             inputField.value = '';
             inputField.disabled = false;
-            inputField.focus();
+            
+            // Chỉ auto-focus trên thiết bị không phải mobile để tránh bàn phím ảo đẩy màn hình khi vừa chuyển câu
+            if (!('ontouchstart' in window)) {
+                inputField.focus();
+            }
             
             document.getElementById('lbl-result').innerText = '';
             document.getElementById('lbl-correct-answer').innerText = '';
+            document.getElementById('lbl-correct-answer').style.display = 'none';
             
-            // Thiết lập trạng thái nút về trạng thái kiểm tra
             const btn = document.getElementById('btn-action');
             btn.innerText = 'Kiểm tra';
             btn.className = 'btn-check';
 
-            // Hiển thị tiến độ câu hỏi hiện tại
-            document.getElementById('lbl-progress').innerText = `Câu: ${currentIndex + 1} / ${vocabularyData.length}`;
+            document.getElementById('lbl-progress').innerText = `CÂU: ${currentIndex + 1} / ${vocabularyData.length}`;
         }
 
         function handleAction() {
@@ -255,35 +341,38 @@
             const inputField = document.getElementById('txt-answer');
             
             const rawUserAnswer = inputField.value;
-            // Làm sạch câu trả lời người dùng và đáp án cột B (bỏ dấu ngoặc vuông để so sánh)
             const cleanUser = cleanHiragana(rawUserAnswer);
             const cleanCorrect = cleanHiragana(item.colB);
             
             if(!rawUserAnswer.trim()) {
-                alert('Vui lòng nhập cách đọc trước!');
+                alert('Vui lòng nhập cách đọc trước nhé!');
                 return;
             }
 
             isAnswered = true;
             inputField.disabled = true;
 
-            // KHI LẬT MẶT SAU: Thay đổi nội dung hiển thị từ Cột D sang Cột E
             document.getElementById('lbl-meaning').innerText = item.colE ? item.colE : '(Trống dữ liệu cột E)';
 
             const resultLbl = document.getElementById('lbl-result');
             
-            // Thực hiện đối chiếu chuỗi Hiragana thuần
-            if (cleanUser === cleanCorrect) {
+            if (cleanUser === cleanCorrect && cleanCorrect !== '') {
                 resultLbl.innerText = '🎉 CHÍNH XÁC!';
                 resultLbl.className = 'result-message success';
             } else {
                 resultLbl.innerText = '❌ SAI MẤT RỒI!';
                 resultLbl.className = 'result-message error';
-                // Hiện đáp án gốc chứa cả dấu ngoặc (nếu có) từ cột B để người học dễ so sánh và ghi nhớ cấu trúc từ
-                document.getElementById('lbl-correct-answer').innerText = `Đáp án đúng là: ${item.colB}`;
+                
+                // Hiển thị phần text gốc trong ngoặc rõ ràng
+                const targetDisplay = item.colB.includes('[') && item.colB.includes(']') 
+                    ? item.colB.substring(item.colB.indexOf('[') + 1, item.colB.indexOf(']'))
+                    : item.colB;
+                
+                const correctLbl = document.getElementById('lbl-correct-answer');
+                correctLbl.innerText = `Đáp án: ${targetDisplay}`;
+                correctLbl.style.display = 'inline-block';
             }
 
-            // Chuyển nút bấm sang trạng thái qua câu tiếp
             const btn = document.getElementById('btn-action');
             btn.innerText = 'Tiếp theo';
             btn.className = 'btn-next';
@@ -294,7 +383,7 @@
                 currentIndex++;
                 loadQuestion();
             } else {
-                alert('Chúc mừng! Bạn đã hoàn thành xong bộ từ vựng hiện tại.');
+                alert('Chúc mừng! Bạn đã hoàn thành xuất sắc bộ từ vựng 🌸');
                 currentIndex = 0;
                 loadQuestion();
             }
@@ -306,7 +395,6 @@
             loadQuestion();
         }
 
-        // Kích hoạt phím Enter để thao tác nhanh mà không cần click chuột
         document.getElementById('txt-answer').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 handleAction();
